@@ -113,7 +113,7 @@ source $ZSH/oh-my-zsh.sh
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 export TERM=xterm-256color
-alias tmux = "tmux -2"
+alias tmux="tmux -2"
 # for docker
 alias dk="docker"
 alias dkr="docker run"
