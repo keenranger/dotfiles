@@ -3,10 +3,8 @@ SRCDIR := $(shell pwd)
 
 copyfiles:
 		@echo "copying files"
-		@mv $(HOME)/.vimrc $(HOME)/.vimrc.bak
-		@mv $(HOME)/.tmux.conf $(HOME)/.tmux.conf.bak
-		@mv $(HOME)/.zshrc $(HOME)/.zshrc.bak
-
-		@ln -s $(SRCDIR)/.vimrc $(HOME)/.vimrc
-		@ln -s $(SRCDIR)/.tmux.conf $(HOME)/.tmux.conf
-		@ln -s $(SRCDIR)/.zshrc $(HOME)/.zshrc 
+		
+		@ln -s -b $(SRCDIR)/vimrc $(HOME)/.vimrc
+		@ln -s -b $(SRCDIR)/tmux.conf $(HOME)/.tmux.conf
+		@ln -s -b $(SRCDIR)/:zshrc $(HOME)/.zshrc
+		@ln -s -b $(SRCDIR)/nvim/ $(HOME)/.config/nvim/
