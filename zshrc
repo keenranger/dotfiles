@@ -6,8 +6,14 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
+export PATH=$HOME/bin:/usr/local/bin:$HOME/.local/bin:$PATH
+# gopath
+export GOPATH=$HOME/go
+export PATH=$GOPATH/bin:$PATH
+# pyenv PATH
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv virtualenv-init -)"
 # Path to your oh-my-zsh installation.
 export ZSH="/home/knrr/.oh-my-zsh"
 
@@ -118,4 +124,10 @@ alias tmux="tmux -2"
 alias dk="docker"
 alias dkr="docker run"
 alias dkps="docker ps"
+alias dkx="docker exec"
 
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/knrr/google-cloud-sdk/path.zsh.inc' ]; then . '/home/knrr/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/knrr/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/knrr/google-cloud-sdk/completion.zsh.inc'; fi
