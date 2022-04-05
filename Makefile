@@ -4,10 +4,10 @@ SRCDIR := $(shell pwd)
 copyfiles:
 		@echo "copying files"
 		
-		@ln -s -b $(SRCDIR)/vimrc $(HOME)/.vimrc
-		@ln -s -b $(SRCDIR)/tmux.conf $(HOME)/.tmux.conf
-		@ln -s -b $(SRCDIR)/zshrc $(HOME)/.zshrc
-		@ln -s -b $(SRCDIR)/config/nvim $(HOME)/.config/nvim
+		@ln -s $(SRCDIR)/vimrc $(HOME)/.vimrc
+		@ln -s $(SRCDIR)/tmux.conf $(HOME)/.tmux.conf
+		@ln -s $(SRCDIR)/zshrc $(HOME)/.zshrc
+		@ln -s $(SRCDIR)/config/nvim $(HOME)/.config/nvim
 python:
 		@sudo apt install -y python3-pip
 		@pip3 install --user pipenv

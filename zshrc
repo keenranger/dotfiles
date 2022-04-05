@@ -16,6 +16,8 @@ eval "$(pyenv init --path)"
 eval "$(pyenv virtualenv-init -)"
 # Path to your oh-my-zsh installation.
 export ZSH="/home/knrr/.oh-my-zsh"
+# brewpath
+export PATH=/opt/homebrew/bin:$PATH
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
