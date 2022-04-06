@@ -15,7 +15,7 @@ export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init --path)"
 eval "$(pyenv virtualenv-init -)"
 # Path to your oh-my-zsh installation.
-export ZSH="/home/knrr/.oh-my-zsh"
+export ZSH="/$HOME/.oh-my-zsh"
 # brewpath
 export PATH=/opt/homebrew/bin:$PATH
 
@@ -85,7 +85,11 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(
+git
+fzf
+)
+
 
 source $ZSH/oh-my-zsh.sh
 
