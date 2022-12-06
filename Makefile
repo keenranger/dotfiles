@@ -12,6 +12,7 @@ copyfiles:
 		@ln -sf $(SRCDIR)/vimrc $(HOME)/.vimrc
 		@ln -sf $(SRCDIR)/tmux.conf $(HOME)/.tmux.conf
 		@ln -sf $(SRCDIR)/zshrc $(HOME)/.zshrc
+		@ln -sf $(SRCDIR)/zprofile $(HOME)/.zprofile
 		@ln -sf $(SRCDIR)/config/nvim $(HOME)/.config/nvim
 font:
 		@curl -L https://github.com/naver/d2codingfont/releases/download/VER1.3.2/D2Coding-Ver1.3.2-20180524.zip -o D2Coding.zip

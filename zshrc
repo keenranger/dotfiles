@@ -7,17 +7,8 @@ fi
 
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$HOME/.local/bin:$PATH
-# gopath
-export GOPATH=$HOME/go
-export PATH=$GOPATH/bin:$PATH
-# pyenv PATH
-export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv virtualenv-init -)"
 # Path to your oh-my-zsh installation.
 export ZSH="/$HOME/.oh-my-zsh"
-# brewpath
-export PATH=/opt/homebrew/bin:$PATH
 
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
