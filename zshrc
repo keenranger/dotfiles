@@ -9,6 +9,9 @@ fi
 export PATH=$HOME/bin:/usr/local/bin:$HOME/.local/bin:$PATH
 # Path to your oh-my-zsh installation.
 export ZSH="/$HOME/.oh-my-zsh"
+# Brew configuration
+# Set PATH, MANPATH, etc., for Homebrew.
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
@@ -66,6 +69,11 @@ export LANG=ko_KR.UTF-8
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Go configuration
+export PATH=$PATH:/usr/local/go/bin
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
 
 export TERM=xterm-256color
 alias tmux="tmux -2"
