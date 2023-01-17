@@ -27,4 +27,10 @@ set_mac(){
 if [ $# = 0 ]; then
 	create_symlinks
 	set_zsh
+	if [[ "$CHECK_OS" = "Darwin"* ]]; then
+		set_mac
+	fi
+else
+	$1
 fi
+
