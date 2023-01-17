@@ -48,7 +48,15 @@ HIST_STAMPS="yyyy-mm-dd"
 plugins=(
 git
 fzf
+tmux
+aws
+golang
+zsh-interactive-cd
+zsh-syntax-highlighting
+zsh-autosuggestions
 )
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+
 
 
 source $ZSH/oh-my-zsh.sh
