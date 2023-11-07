@@ -19,6 +19,9 @@ set_zsh(){
 	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 	git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions
 	brew install neovim
+	brew install node
+	npm install -g @githubnext/github-copilot-cli
+	github-copilot-cli auth
 }
 
 set_mac(){
