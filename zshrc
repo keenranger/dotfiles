@@ -96,7 +96,6 @@ if [ -f '/home/knrr/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/knrr/g
 
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.3.2/bin/terraform terraform
-eval "$(github-copilot-cli alias -- "$0")"
 
 # Mojo
 export MODULAR_HOME="$HOME/.modular"
