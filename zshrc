@@ -100,3 +100,6 @@ complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.3.2/bin/ter
 # Mojo
 export MODULAR_HOME="$HOME/.modular"
 export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
+
+# gpg
+export GPG_TTY=$(tty)
