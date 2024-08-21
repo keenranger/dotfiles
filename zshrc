@@ -49,16 +49,14 @@ HIST_STAMPS="yyyy-mm-dd"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
 git
-fzf
 tmux
 aws
 golang
+fzf
 zsh-interactive-cd
 zsh-syntax-highlighting
 zsh-autosuggestions
 )
-fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
-
 
 
 source $ZSH/oh-my-zsh.sh
@@ -103,3 +101,26 @@ export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
 
 # gpg
 export GPG_TTY=$(tty)
+
+# fuck
+eval $(thefuck --alias)
+
+# Preview file content using bat (https://github.com/sharkdp/bat)
+export FZF_CTRL_T_OPTS="
+  --walker-skip .git,node_modules,target
+  --preview 'bat -n --color=always {}'
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+# CTRL-/ to toggle small preview window to see the full command
+# CTRL-Y to copy the command into clipboard using pbcopy
+export FZF_CTRL_R_OPTS="
+  --preview 'echo {}' --preview-window up:3:hidden:wrap
+  --bind 'ctrl-/:toggle-preview'
+  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
+  --color header:italic
+  --header 'Press CTRL-Y to copy command into clipboard'"
+
+. "$HOME/.cargo/env"
+export PATH="$HOME/.rye/shims:$PATH"
+
+# For podman
+export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
