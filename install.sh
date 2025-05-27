@@ -24,8 +24,6 @@ set_zsh(){
 	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 	git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions
 	
-    sudo apt install pipx
-    pipx ensurepath
 
     type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -61,7 +59,6 @@ container(){
 	brew install podman
 	podman machine init
 	podman machine start
-	pipx install podman-compose
 	sudo apt-get update
 	sudo apt install ca-certificates curl gnupg
 	sudo install -m 0755 -d /etc/apt/keyrings
