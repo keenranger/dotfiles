@@ -86,12 +86,6 @@ export PATH=$PATH:$GOPATH/bin
 export TERM=xterm-256color
 alias tmux="tmux -2"
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/home/knrr/google-cloud-sdk/path.zsh.inc' ]; then . '/home/knrr/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/home/knrr/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/knrr/google-cloud-sdk/completion.zsh.inc'; fi
-
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.3.2/bin/terraform terraform
 
@@ -124,3 +118,42 @@ export PATH="$HOME/.rye/shims:$PATH"
 
 # For podman
 export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+
+alias terraform="tofu"
+export DOCKER_HOST=unix:///var/run/docker.sock
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/mark/src/keenranger-rag/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/mark/src/keenranger-rag/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/mark/src/keenranger-rag/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/mark/src/keenranger-rag/google-cloud-sdk/completion.zsh.inc'; fi
+
+export NAS_PATH="/Volumes/NAS1"
+
+alias claude="/Users/mark/.claude/local/claude"
+
+# pnpm
+export PNPM_HOME="/Users/mark/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# fnm
+FNM_PATH="/Users/mark/Library/Application Support/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="/Users/mark/Library/Application Support/fnm:$PATH"
+  eval "`fnm env`"
+fi
+eval "$(fnm env --use-on-cd --shell zsh)"
+
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+cci() { claude "/issue $*"; }
+ccp() { claude "/pr $*"; }
+ccint() { claude "/interview $*"; }
+
