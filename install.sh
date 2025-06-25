@@ -8,6 +8,8 @@ create_symlinks(){
 	ln -sf "$SRCDIR/tmux.conf" "$HOME/.tmux.conf"
 	ln -sf "$SRCDIR/zshrc" "$HOME/.zshrc"
 	ln -sf "$SRCDIR/config/nvim" "$HOME/.config/nvim"
+	mkdir -p "$HOME/.claude"
+	ln -sf "$SRCDIR/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 }
 
 set_zsh(){
