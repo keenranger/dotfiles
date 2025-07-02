@@ -89,15 +89,8 @@ alias tmux="tmux -2"
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.3.2/bin/terraform terraform
 
-# Mojo
-export MODULAR_HOME="$HOME/.modular"
-export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
-
 # gpg
 export GPG_TTY=$TTY
-
-# fuck
-eval $(thefuck --alias)
 
 # Preview file content using bat (https://github.com/sharkdp/bat)
 export FZF_CTRL_T_OPTS="
@@ -121,12 +114,6 @@ export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
 
 alias terraform="tofu"
 export DOCKER_HOST=unix:///var/run/docker.sock
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '$HOME/src/keenranger-rag/google-cloud-sdk/path.zsh.inc' ]; then . '$HOME/src/keenranger-rag/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '$HOME/src/keenranger-rag/google-cloud-sdk/completion.zsh.inc' ]; then . '$HOME/src/keenranger-rag/google-cloud-sdk/completion.zsh.inc'; fi
 
 export NAS_PATH="/Volumes/NAS1"
 
