@@ -130,8 +130,6 @@ if [ -f '/Users/mark/src/keenranger-rag/google-cloud-sdk/completion.zsh.inc' ]; 
 
 export NAS_PATH="/Volumes/NAS1"
 
-alias claude="/Users/mark/.claude/local/claude"
-
 # pnpm
 export PNPM_HOME="/Users/mark/Library/pnpm"
 case ":$PATH:" in

@@ -10,6 +10,7 @@ create_symlinks(){
 	ln -sf "$SRCDIR/config/nvim" "$HOME/.config/nvim"
 	mkdir -p "$HOME/.claude"
 	ln -sf "$SRCDIR/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+	ln -sf "$SRCDIR/claude-commands" "$HOME/.claude/commands"
 }
 
 set_zsh(){
