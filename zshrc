@@ -94,7 +94,7 @@ export MODULAR_HOME="$HOME/.modular"
 export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
 
 # gpg
-export GPG_TTY=$(tty)
+export GPG_TTY=$TTY
 
 # fuck
 eval $(thefuck --alias)
