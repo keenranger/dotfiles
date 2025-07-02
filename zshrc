@@ -123,15 +123,15 @@ alias terraform="tofu"
 export DOCKER_HOST=unix:///var/run/docker.sock
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/mark/src/keenranger-rag/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/mark/src/keenranger-rag/google-cloud-sdk/path.zsh.inc'; fi
+if [ -f '$HOME/src/keenranger-rag/google-cloud-sdk/path.zsh.inc' ]; then . '$HOME/src/keenranger-rag/google-cloud-sdk/path.zsh.inc'; fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f '/Users/mark/src/keenranger-rag/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/mark/src/keenranger-rag/google-cloud-sdk/completion.zsh.inc'; fi
+if [ -f '$HOME/src/keenranger-rag/google-cloud-sdk/completion.zsh.inc' ]; then . '$HOME/src/keenranger-rag/google-cloud-sdk/completion.zsh.inc'; fi
 
 export NAS_PATH="/Volumes/NAS1"
 
 # pnpm
-export PNPM_HOME="/Users/mark/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
@@ -139,9 +139,9 @@ esac
 # pnpm end
 
 # fnm
-FNM_PATH="/Users/mark/Library/Application Support/fnm"
+FNM_PATH="$HOME/Library/Application Support/fnm"
 if [ -d "$FNM_PATH" ]; then
-  export PATH="/Users/mark/Library/Application Support/fnm:$PATH"
+  export PATH="$FNM_PATH:$PATH"
   eval "`fnm env`"
 fi
 eval "$(fnm env --use-on-cd --shell zsh)"
