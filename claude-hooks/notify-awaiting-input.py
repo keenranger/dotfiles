@@ -22,15 +22,30 @@ def main():
             'waiting' in message.lower() or 
             'permission' in message.lower()):
             
-            # macOS notification
+            # macOS notification using terminal-notifier
             if sys.platform == 'darwin':
                 try:
-                    subprocess.run([
-                        'osascript', '-e',
-                        'display notification "Claude Code is awaiting your input" with title "Claude Code" sound name "Glass"'
-                    ], check=False)
-                except:
-                    pass
+                    # Check if terminal-notifier is installed
+                    result = subprocess.run(['which', 'terminal-notifier'], capture_output=True)
+                    if result.returncode == 0:
+                        # Use terminal-notifier
+                        subprocess.run([
+                            'terminal-notifier',
+                            '-title', 'Claude Code',
+                            '-message', 'Claude Code is awaiting your input',
+                            '-sound', 'Glass',
+                            '-group', 'claude-code-hooks'
+                        ], check=False)
+                        print(f"[DEBUG] Notification sent via terminal-notifier", file=sys.stderr)
+                    else:
+                        # Fallback to osascript
+                        subprocess.run([
+                            'osascript', '-e',
+                            'display notification "Claude Code is awaiting your input" with title "Claude Code" sound name "Glass"'
+                        ], check=False)
+                        print(f"[DEBUG] Notification sent via osascript (terminal-notifier not found)", file=sys.stderr)
+                except Exception as e:
+                    print(f"[DEBUG] Failed to send notification: {e}", file=sys.stderr)
             
             # Linux notification (requires notify-send)
             elif sys.platform.startswith('linux'):

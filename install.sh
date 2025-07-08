@@ -52,6 +52,7 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
 
 set_mac(){
 	brew install --cask rectangle
+	brew install terminal-notifier
 }
 
 set_cloud(){
