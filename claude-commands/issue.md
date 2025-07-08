@@ -1,37 +1,46 @@
-You are an AI assistant tasked with creating a well-structured GitHub issue for a feature request, bug report, or improvement idea. Your goal is to turn the provided feature description into a comprehensive GitHub issue that follows best practices and project conventions.
+You are an expert GitHub issue creator. Your task is to transform user descriptions into well-structured, actionable GitHub issues that follow best practices.
 
-<feature_description>
-$ARGUMENTS
-</feature_description>
+User's description: $ARGUMENTS
 
-Follow these steps to complete the task:
+Create a GitHub issue following these guidelines:
 
-1. Research the repository:
-   - Visit the provided repo URL and examine the repository's structure, existing issues, and documentation.
-   - Look for any CONTRIBUTING.md, ISSUE_TEMPLATE.md, or similar files that might contain guidelines for creating issues.
-   - Note the project's coding style, naming conventions, and any specific requirements for submitting issues.
+## Title Guidelines
+- Start with a clear action verb (Fix, Add, Update, Remove, Implement)
+- Be specific but concise (50-70 characters ideal)
+- Include the component/area affected when relevant
+- Examples: "Fix memory leak in user authentication", "Add dark mode support to settings page"
 
-2. Research best practices:
-   - Search for current best practices in writing GitHub issues, focusing on clarity, completeness, and actionability.
-   - Look for examples of well-written issues in popular open-source projects for inspiration.
+## Issue Structure
 
-3. Present a plan:
-   - Based on your research, outline a plan for creating the GitHub issue.
-   - Include the proposed structure of the issue, any labels or milestones you plan to use, and how you'll incorporate project-specific conventions.
-   - Present this plan in <plan> tags.
+### Description
+Write 2-4 sentences that:
+- Clearly explain the problem or feature request
+- Provide context on why this matters
+- Mention any user impact or business value
 
-4. Create the GitHub issue:
-   - Once you have formulated your plan, draft the GitHub issue content.
-   - Include a clear title, detailed description, acceptance criteria, and any additional context or resources that would be helpful for developers.
-   - Use appropriate formatting (e.g., Markdown) to enhance readability.
-   - Add any relevant labels, milestones, or assignees based on the project's conventions.
+### Current Behavior (for bugs)
+- What is happening now?
+- Include specific error messages if available
+- Describe steps to reproduce
 
-5. Final output:
-   - Present the complete GitHub issue content in <github_issue> tags.
-   - Do not include any explanations or notes outside of these tags in your final output.
-   - Use the GitHub CLI `gh issue create` command to create the actual issue after you generate the content.
-   - Assign either the label `bug` or `enhancement` based on the nature of the issue.
+### Expected Behavior
+- What should happen instead?
+- Be specific about the desired outcome
 
-Remember to think carefully about the feature description and how to best present it as a GitHub issue. Consider the perspective of both the project maintainers and potential contributors who might work on this feature.
+### Proposed Solution
+- Suggest a technical approach if you have one
+- Break down into steps if complex
+- Mention any alternatives considered
 
-Your final output should consist of only the content within the <github_issue> tags, ready to be copied and pasted directly into GitHub.
+### Additional Context
+- Environment details (if relevant)
+- Screenshots or code snippets (indicate where they would go)
+- Related issues or PRs
+- Any deadlines or priority considerations
+
+## Output Format
+Format your response as a complete GitHub issue ready to be created. At the end, provide:
+1. Suggested labels (choose from: bug, enhancement, documentation, performance, security, good-first-issue)
+2. The exact `gh issue create` command with title, body, and labels
+
+Remember: Good issues are actionable, have clear acceptance criteria, and provide enough context for any developer to understand and potentially work on them.

@@ -141,5 +141,5 @@ export PATH=$PATH:$ANDROID_HOME/platform-tools
 cc() { claude "$*"; }
 cci() { claude "/issue $*"; }
 ccp() { claude "/pr $*"; }
-ccint() { claude "/interview $*"; }
+ccr() { claude "/review $*"; }
 
