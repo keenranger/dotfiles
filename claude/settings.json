@@ -22,6 +22,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run $HOME/.claude/hooks/notify-on-stop.py"
+          }
+        ]
+      }
     ]
   }
 }

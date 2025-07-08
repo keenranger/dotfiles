@@ -4,7 +4,6 @@ import os
 import sys
 import json
 import subprocess
-from datetime import datetime
 
 def main():
     # Check if this is a Notification event
@@ -17,11 +16,10 @@ def main():
         notification_type = tool_input.get('type', '')
         message = tool_input.get('message', '')
         
-        # Log ALL notifications for debugging
-        log_path = os.path.expanduser('~/.claude/hooks-debug.log')
-        with open(log_path, 'a') as f:
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            f.write(f"[{timestamp}] Notification received - Type: '{notification_type}', Message: '{message}', Full input: {tool_input}\n")
+        # Get context for notification
+        cwd = os.getcwd()
+        project_name = os.path.basename(cwd)
+        
         
         # Check if Claude is waiting for input or permission
         if (notification_type == 'awaiting_input' or 
@@ -35,31 +33,30 @@ def main():
                     # Check if terminal-notifier is installed
                     result = subprocess.run(['which', 'terminal-notifier'], capture_output=True)
                     if result.returncode == 0:
-                        # Use terminal-notifier
+                        # Use terminal-notifier with context
                         subprocess.run([
                             'terminal-notifier',
-                            '-title', 'Claude Code',
-                            '-message', 'Claude Code is awaiting your input',
+                            '-title', f'CC - {project_name}',
+                            '-message', 'Awaiting your input',
                             '-sound', 'Glass',
                             '-group', 'claude-code-hooks'
                         ], check=False)
-                        print(f"[DEBUG] Notification sent via terminal-notifier", file=sys.stderr)
                     else:
                         # Fallback to osascript
                         subprocess.run([
                             'osascript', '-e',
-                            'display notification "Claude Code is awaiting your input" with title "Claude Code" sound name "Glass"'
+                            f'display notification "Awaiting your input" with title "CC - {project_name}" sound name "Glass"'
                         ], check=False)
-                        print(f"[DEBUG] Notification sent via osascript (terminal-notifier not found)", file=sys.stderr)
-                except Exception as e:
-                    print(f"[DEBUG] Failed to send notification: {e}", file=sys.stderr)
+                except:
+                    pass
             
             # Linux notification (requires notify-send)
             elif sys.platform.startswith('linux'):
                 try:
                     subprocess.run([
-                        'notify-send', 'Claude Code', 
-                        'Claude Code is awaiting your input',
+                        'notify-send', 
+                        f'CC - {project_name}', 
+                        'Awaiting your input',
                         '--urgency=normal'
                     ], check=False)
                 except:
@@ -68,14 +65,9 @@ def main():
             # Terminal bell
             print('\a', end='', flush=True)
             
-            # Log the notification
-            log_path = os.path.expanduser('~/.claude/hooks.log')
-            with open(log_path, 'a') as f:
-                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                f.write(f"[{timestamp}] Claude Code awaiting input: {message}\n")
     
-    except Exception as e:
-        print(f"[DEBUG] Error in notification hook: {e}", file=sys.stderr)
+    except:
+        pass
     
     return 0
 
