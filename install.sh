@@ -7,10 +7,18 @@ create_symlinks(){
 	ln -sf "$SRCDIR/vimrc" "$HOME/.vimrc"
 	ln -sf "$SRCDIR/tmux.conf" "$HOME/.tmux.conf"
 	ln -sf "$SRCDIR/zshrc" "$HOME/.zshrc"
+	# Remove existing nvim symlink to prevent recursive linking
+	[ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
 	ln -sf "$SRCDIR/config/nvim" "$HOME/.config/nvim"
 	mkdir -p "$HOME/.claude"
 	ln -sf "$SRCDIR/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+	# Remove existing symlinks to prevent recursive linking
+	[ -L "$HOME/.claude/commands" ] && rm "$HOME/.claude/commands"
 	ln -sf "$SRCDIR/claude-commands" "$HOME/.claude/commands"
+	
+	# For hooks, remove existing and create symlink
+	[ -e "$HOME/.claude/hooks" ] && rm -rf "$HOME/.claude/hooks"
+	ln -sf "$SRCDIR/claude-hooks" "$HOME/.claude/hooks"
 }
 
 set_zsh(){
