@@ -3,10 +3,17 @@
 import os
 import sys
 import subprocess
+import json
 
 def main():
-    # Check if this is a PreStopResponse event
-    if os.environ.get('CLAUDE_HOOK_EVENT') != 'PreStopResponse':
+    # Read JSON input from stdin
+    try:
+        hook_input = json.load(sys.stdin)
+    except:
+        return 0
+    
+    # Check if this is a Stop event
+    if hook_input.get('hook_event_name') != 'Stop':
         return 0
     
     try:

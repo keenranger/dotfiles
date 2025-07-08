@@ -5,18 +5,24 @@ import sys
 import json
 
 def main():
+    # Read JSON input from stdin
+    try:
+        hook_input = json.load(sys.stdin)
+    except:
+        return 0
+    
     # Debug output to stderr
     print("[DEBUG] Hook check-commit-signing.py triggered", file=sys.stderr)
-    print(f"[DEBUG] CLAUDE_TOOL_NAME: {os.environ.get('CLAUDE_TOOL_NAME', 'NOT SET')}", file=sys.stderr)
-    print(f"[DEBUG] CLAUDE_TOOL_INPUT: {os.environ.get('CLAUDE_TOOL_INPUT', 'NOT SET')}", file=sys.stderr)
+    print(f"[DEBUG] hook_event_name: {hook_input.get('hook_event_name')}", file=sys.stderr)
+    print(f"[DEBUG] tool_name: {hook_input.get('tool_name')}", file=sys.stderr)
     
     # Check if this is a Bash tool call
-    if os.environ.get('CLAUDE_TOOL_NAME') != 'Bash':
+    if hook_input.get('tool_name') != 'Bash':
         return 0
     
     try:
-        # Parse the tool input JSON
-        tool_input = json.loads(os.environ.get('CLAUDE_TOOL_INPUT', '{}'))
+        # Get the tool input from hook data
+        tool_input = hook_input.get('tool_input', {})
         command = tool_input.get('command', '')
         
         print(f"[DEBUG] Extracted command: {command}", file=sys.stderr)

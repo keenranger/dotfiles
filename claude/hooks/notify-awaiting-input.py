@@ -6,13 +6,19 @@ import json
 import subprocess
 
 def main():
+    # Read JSON input from stdin
+    try:
+        hook_input = json.load(sys.stdin)
+    except:
+        return 0
+    
     # Check if this is a Notification event
-    if os.environ.get('CLAUDE_HOOK_EVENT') != 'Notification':
+    if hook_input.get('hook_event_name') != 'Notification':
         return 0
     
     try:
-        # Parse the tool input JSON
-        tool_input = json.loads(os.environ.get('CLAUDE_TOOL_INPUT', '{}'))
+        # Parse the tool input from the hook data
+        tool_input = hook_input.get('tool_input', {})
         notification_type = tool_input.get('type', '')
         message = tool_input.get('message', '')
         
