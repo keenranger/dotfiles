@@ -17,10 +17,17 @@ def main():
         notification_type = tool_input.get('type', '')
         message = tool_input.get('message', '')
         
+        # Log ALL notifications for debugging
+        log_path = os.path.expanduser('~/.claude/hooks-debug.log')
+        with open(log_path, 'a') as f:
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            f.write(f"[{timestamp}] Notification received - Type: '{notification_type}', Message: '{message}', Full input: {tool_input}\n")
+        
         # Check if Claude is waiting for input or permission
         if (notification_type == 'awaiting_input' or 
             'waiting' in message.lower() or 
-            'permission' in message.lower()):
+            'permission' in message.lower() or
+            'input' in message.lower()):
             
             # macOS notification using terminal-notifier
             if sys.platform == 'darwin':

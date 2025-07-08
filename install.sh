@@ -10,19 +10,18 @@ create_symlinks(){
 	# Remove existing nvim symlink to prevent recursive linking
 	[ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
 	ln -sf "$SRCDIR/config/nvim" "$HOME/.config/nvim"
+	# Claude configuration
 	mkdir -p "$HOME/.claude"
-	ln -sf "$SRCDIR/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-	# Remove existing symlinks to prevent recursive linking
-	[ -L "$HOME/.claude/commands" ] && rm "$HOME/.claude/commands"
-	ln -sf "$SRCDIR/claude-commands" "$HOME/.claude/commands"
-	
-	# For hooks, remove existing and create symlink
+	# Remove existing symlinks only if they exist
+	[ -e "$HOME/.claude/CLAUDE.md" ] && rm -f "$HOME/.claude/CLAUDE.md"
+	[ -e "$HOME/.claude/commands" ] && rm -rf "$HOME/.claude/commands"
 	[ -e "$HOME/.claude/hooks" ] && rm -rf "$HOME/.claude/hooks"
-	ln -sf "$SRCDIR/claude-hooks" "$HOME/.claude/hooks"
-	
-	# For settings.json, remove existing and create symlink
-	[ -L "$HOME/.claude/settings.json" ] && rm "$HOME/.claude/settings.json"
-	ln -sf "$SRCDIR/claude-settings.json" "$HOME/.claude/settings.json"
+	[ -e "$HOME/.claude/settings.json" ] && rm -f "$HOME/.claude/settings.json"
+	# Create symlinks for all Claude files
+	ln -sf "$SRCDIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+	ln -sf "$SRCDIR/claude/commands" "$HOME/.claude/commands"
+	ln -sf "$SRCDIR/claude/hooks" "$HOME/.claude/hooks"
+	ln -sf "$SRCDIR/claude/settings.json" "$HOME/.claude/settings.json"
 }
 
 set_zsh(){
