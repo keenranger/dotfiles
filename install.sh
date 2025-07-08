@@ -19,6 +19,10 @@ create_symlinks(){
 	# For hooks, remove existing and create symlink
 	[ -e "$HOME/.claude/hooks" ] && rm -rf "$HOME/.claude/hooks"
 	ln -sf "$SRCDIR/claude-hooks" "$HOME/.claude/hooks"
+	
+	# For settings.json, remove existing and create symlink
+	[ -L "$HOME/.claude/settings.json" ] && rm "$HOME/.claude/settings.json"
+	ln -sf "$SRCDIR/claude-settings.json" "$HOME/.claude/settings.json"
 }
 
 set_zsh(){
