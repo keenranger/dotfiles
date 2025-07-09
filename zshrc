@@ -114,6 +114,7 @@ export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
 
 alias terraform="tofu"
 alias docker=podman
+alias docker-compose=podman-compose
 
 export NAS_PATH="/Volumes/NAS1"
 

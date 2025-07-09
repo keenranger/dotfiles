@@ -90,7 +90,7 @@ set_cloud(){
 container(){
 	if [[ "$(uname)" = "Darwin" ]]; then
 		# macOS installation
-		brew install podman
+		brew install podman podman-compose
 		podman machine init
 		podman machine start
 	else
@@ -99,6 +99,8 @@ container(){
 		sudo apt-get install -y podman
 		# Enable podman socket for Docker compatibility
 		systemctl --user enable --now podman.socket
+		# Install podman-compose via pip on Linux
+		pip3 install --user podman-compose
 	fi
 }
 
