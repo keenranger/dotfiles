@@ -1,6 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 SRCDIR=$(pwd)
+CHECK_OS=$(uname)
 
 create_symlinks(){
 	echo "creating symlinks"
@@ -25,32 +27,40 @@ create_symlinks(){
 }
 
 set_zsh(){
-    sudo apt install zsh -y
-    sudo apt install build-essential
-    chsh -s `which zsh`
+	if [[ "$CHECK_OS" = "Darwin" ]]; then
+		# macOS installation
+		brew install zsh
+		brew install fzf ripgrep bat gh neovim
+	else
+		# Linux installation
+		sudo apt update
+		sudo apt install -y zsh build-essential curl neovim
+		
+		# Install GitHub CLI on Linux
+		type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
+		curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+		&& sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+		&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+		&& sudo apt update \
+		&& sudo apt install gh -y
+		
+		# Install Homebrew on Linux
+		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+		eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+		brew install fzf ripgrep bat
+	fi
+	
+	# Common installations for both platforms
+	chsh -s $(which zsh)
 	/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 	git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-	NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-	brew install fzf
-	brew install ripgrep
-	brew install bat
 	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 	git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions
 	/bin/sh -c "$(curl -fsSL https://astral.sh/uv/install.sh)"
-	
-
-    type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
-curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-&& sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-&& sudo apt update \
-&& sudo apt install gh -y
-    gh extension install github/gh-copilot
-
-    sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-    sudo apt install neovim
+	gh extension install github/gh-copilot
+	sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+		https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 }
 
 set_mac(){
@@ -59,16 +69,22 @@ set_mac(){
 }
 
 set_cloud(){
-    # AWS Cli
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-    unzip awscliv2.zip
-    sudo ./aws/install
-    rm -rf aws awscliv2.zip
-    # OpenTofu 
-    curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
-    chmod +x install-opentofu.sh
-    ./install-opentofu.sh --install-method deb
-    rm install-opentofu.sh
+	if [[ "$CHECK_OS" = "Darwin" ]]; then
+		# macOS installation
+		brew install awscli opentofu
+	else
+		# Linux installation
+		# AWS CLI
+		curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+		unzip awscliv2.zip
+		sudo ./aws/install
+		rm -rf aws awscliv2.zip
+		# OpenTofu 
+		curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+		chmod +x install-opentofu.sh
+		./install-opentofu.sh --install-method deb
+		rm install-opentofu.sh
+	fi
 }
 
 container(){
