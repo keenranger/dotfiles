@@ -113,7 +113,7 @@ export PATH="$HOME/.rye/shims:$PATH"
 export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
 
 alias terraform="tofu"
-export DOCKER_HOST=unix:///var/run/docker.sock
+alias docker=podman
 
 export NAS_PATH="/Volumes/NAS1"
 
