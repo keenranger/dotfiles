@@ -17,21 +17,18 @@ def main():
         return 0
     
     try:
-        # Parse the tool input from the hook data
-        tool_input = hook_input.get('tool_input', {})
-        notification_type = tool_input.get('type', '')
-        message = tool_input.get('message', '')
+        # Get the message directly from hook input
+        message = hook_input.get('message', '')
         
         # Get context for notification
         cwd = os.getcwd()
         project_name = os.path.basename(cwd)
         
-        
         # Check if Claude is waiting for input or permission
-        if (notification_type == 'awaiting_input' or 
-            'waiting' in message.lower() or 
+        if ('waiting' in message.lower() or 
             'permission' in message.lower() or
-            'input' in message.lower()):
+            'input' in message.lower() or
+            'awaiting' in message.lower()):
             
             # macOS notification using terminal-notifier
             if sys.platform == 'darwin':
