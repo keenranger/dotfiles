@@ -27,10 +27,24 @@ Write 2-4 sentences that:
 - What should happen instead?
 - Be specific about the desired outcome
 
-### Proposed Solution
-- Suggest a technical approach if you have one
-- Break down into steps if complex
-- Mention any alternatives considered
+### Technical Details (for complex issues)
+Include relevant sections from below:
+
+**Architecture**
+- Component responsibilities and boundaries
+- Data flow and state management
+- Integration points and interfaces
+
+**Requirements**
+- API contracts (request/response formats)
+- Security/performance constraints
+- Compatibility considerations
+
+**Implementation**
+- Technical approach and alternatives
+- Files to modify and dependencies
+- Configuration or schema changes
+
 
 ### Additional Context
 - Environment details (if relevant)
