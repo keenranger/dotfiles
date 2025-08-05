@@ -8,6 +8,10 @@
           {
             "type": "command",
             "command": "uv run --no-project $HOME/.claude/hooks/check-commit-signing.py"
+          },
+          {
+            "type": "command",
+            "command": "uv run --no-project $HOME/.claude/hooks/substitute-pip-with-uv.py"
           }
         ]
       }
