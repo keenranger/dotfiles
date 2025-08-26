@@ -126,21 +126,16 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-# fnm
-FNM_PATH="$HOME/Library/Application Support/fnm"
-if [ -d "$FNM_PATH" ]; then
-  export PATH="$FNM_PATH:$PATH"
-  eval "`fnm env`"
-fi
-eval "$(fnm env --use-on-cd --shell zsh)"
+command -v fnm >/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
+export PATH="$HOME/.npm-global/bin:$PATH"
 
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 
-cc() { claude "$*"; }
-cci() { claude "/issue $*"; }
-ccp() { claude "/pr $*"; }
-ccr() { claude "/review $*"; }
+cc() { command claude "$@"; }
+cci() { command claude "/issue $@"; }
+ccp() { command claude "/pr $@"; }
+ccr() { command claude "/review $@"; }
 
