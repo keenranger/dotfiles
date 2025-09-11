@@ -1,3 +1,7 @@
+## Engineering Philosophy
+- Minimize code and code changes - the best code is no code, the best change is the smallest change
+- Agent instructions need to be detailed since they become system prompts - verbosity here prevents ambiguity in execution
+
 ## Git and Version Control
 - I always want to make signed commit
 - Prefer 'Replace ~' over 'Refactor: Replace ~' when making commits.
