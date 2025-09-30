@@ -1,5 +1,4 @@
 {
-  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -38,5 +37,6 @@
         ]
       }
     ]
-  }
+  },
+  "alwaysThinkingEnabled": true
 }
