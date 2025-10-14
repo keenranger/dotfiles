@@ -1,60 +1,14 @@
-You are an expert GitHub issue creator. Your task is to transform user descriptions into well-structured, actionable GitHub issues that follow best practices.
+Create a GitHub issue for: $ARGUMENTS
 
-User's description: $ARGUMENTS
+Title: Start with action verb (Fix, Add, Update, Remove, Implement). Be specific, 50-70 characters. Include component/area.
 
-Create a GitHub issue following these guidelines:
+Structure:
+- Description (2-4 sentences: problem/feature, why it matters, impact)
+- Current behavior (for bugs: what happens now, error messages, repro steps)
+- Expected behavior (desired outcome, acceptance criteria)
+- Technical details (if complex: architecture, requirements, implementation approach)
+- Additional context (environment, screenshots, related issues/PRs, deadlines)
 
-## Title Guidelines
-- Start with a clear action verb (Fix, Add, Update, Remove, Implement)
-- Be specific but concise (50-70 characters ideal)
-- Include the component/area affected when relevant
-- Examples: "Fix memory leak in user authentication", "Add dark mode support to settings page"
+Output complete GitHub issue, then check available labels with `gh label list` and suggest only labels that exist in the repository, along with the gh issue create command.
 
-## Issue Structure
-
-### Description
-Write 2-4 sentences that:
-- Clearly explain the problem or feature request
-- Provide context on why this matters
-- Mention any user impact or business value
-
-### Current Behavior (for bugs)
-- What is happening now?
-- Include specific error messages if available
-- Describe steps to reproduce
-
-### Expected Behavior
-- What should happen instead?
-- Be specific about the desired outcome
-
-### Technical Details (for complex issues)
-Include relevant sections from below:
-
-**Architecture**
-- Component responsibilities and boundaries
-- Data flow and state management
-- Integration points and interfaces
-
-**Requirements**
-- API contracts (request/response formats)
-- Security/performance constraints
-- Compatibility considerations
-
-**Implementation**
-- Technical approach and alternatives
-- Files to modify and dependencies
-- Configuration or schema changes
-
-
-### Additional Context
-- Environment details (if relevant)
-- Screenshots or code snippets (indicate where they would go)
-- Related issues or PRs
-- Any deadlines or priority considerations
-
-## Output Format
-Format your response as a complete GitHub issue ready to be created. At the end, provide:
-1. Suggested labels (choose from: bug, enhancement, documentation, performance, security, good-first-issue)
-2. The exact `gh issue create` command with title, body, and labels
-
-Remember: Good issues are actionable, have clear acceptance criteria, and provide enough context for any developer to understand and potentially work on them.
+Good issues are actionable, have clear acceptance criteria, and provide enough context for any developer.

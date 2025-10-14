@@ -1,46 +1,14 @@
-You are a GitHub pull request creator. Transform code changes into clear, reviewable pull requests.
+Create a GitHub PR for: $ARGUMENTS
 
-Changes description: $ARGUMENTS
+Use conventional commit format for title (feat:, fix:, docs:). Be specific, 50-70 characters. Include issue number if relevant.
 
-Create a pull request with:
+Structure the PR description with:
+- Summary (2-3 sentences: what, why, approach)
+- Key changes (3-7 bullets, highlight breaking changes)
+- Type of change (bug fix, feature, breaking change, docs, refactor, performance)
+- Testing performed (tests added/updated, manual testing, edge cases)
+- Related issues (Closes #X, Related to #Y)
 
-## Title
-- Use conventional commit format if applicable (feat:, fix:, docs:)
-- Be specific, 50-70 characters
-- Include issue number if relevant
+Provide complete PR description in Markdown, then check available labels with `gh label list` and suggest only labels that exist, along with the gh pr create command.
 
-## Description
-
-### Summary
-2-3 sentences explaining what changed, why it's needed, and the approach taken.
-
-### Changes
-Bullet points of key changes (3-7 items):
-- Focus on what changed, not implementation details
-- Group related changes
-- Highlight breaking changes
-
-### Type of Change
-- Bug fix
-- New feature
-- Breaking change
-- Documentation
-- Refactoring
-- Performance improvement
-
-### Testing
-Brief description of testing performed:
-- Tests added/updated
-- Manual testing steps
-- Edge cases considered
-
-### Related Issues
-- Closes #[number]
-- Related to #[number]
-
-## Output
-Provide the complete PR description in Markdown, then suggest:
-1. Appropriate labels
-2. The gh pr create command
-
-Keep it concise and focused on helping reviewers understand the changes quickly.
+Focus on helping reviewers understand changes quickly.

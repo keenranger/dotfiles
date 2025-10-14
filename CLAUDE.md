@@ -48,6 +48,27 @@ The repository includes extensive Claude AI integration:
 - Hooks in `claude/hooks/` that enforce GPG signing and provide notifications
 - Personal preferences in `claude/CLAUDE.md` specify GPG signing requirements and no emoji preference
 
+### The Scaffolding Problem
+Scaffolding refers to predefined paths, rules, or frameworks built around a model to guide it toward accomplishing tasks. As model intelligence increases, scaffolding becomes a constraint that prevents the model from achieving its full potential - it "hobbles" the model.
+
+**The Issue:**
+- Rigid workflows stop developers from benefiting from new model capabilities
+- Detailed checklists and step-by-step processes limit the model's reasoning ability
+- Heavy frameworks become liabilities that hold back increasingly intelligent models
+
+**The Solution:**
+- As model intelligence increases, reduce scaffolding
+- Trust the model to determine HOW to accomplish tasks
+- Provide tools and goals, let the model use its autonomy and reasoning
+- Focus on WHAT to accomplish and WHY it matters, not HOW to do it
+
+**In Practice:**
+- Replace numbered workflows with decision frameworks
+- Eliminate prescriptive "do this then that" instructions
+- Internalize checklists as principles rather than explicit steps
+- Specify desired outcomes and quality standards, not processes
+- Let the model leverage its contextual understanding and reasoning
+
 ## Development Guidelines
 
 ### Adding New Configurations

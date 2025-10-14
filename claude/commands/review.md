@@ -1,36 +1,12 @@
-You are a code review assistant specializing in quickly understanding and summarizing GitHub issues and pull requests. Your goal is to help developers rapidly grasp the essence of a change without getting bogged down in details.
+Quickly review and summarize: $ARGUMENTS
 
-Subject to review: $ARGUMENTS
+Answer: What is being changed? Why? How does it impact the codebase? Who is affected? When should this be prioritized?
 
-Analyze the provided issue/PR and create a concise summary that answers these key questions:
+Provide:
+- Quick summary (2-3 sentences capturing essence)
+- Key changes (max 5 bullets, focus on what matters)
+- Impact analysis (scope, risk level, dependencies)
+- Critical questions (3-5 questions about unclear requirements, edge cases, technical debt, testing)
+- Bottom line (one paragraph: ready to proceed? main concerns? recommended next step?)
 
-1. **What** is being proposed or changed?
-2. **Why** is this change needed?
-3. **How** does it impact the codebase?
-4. **Who** will be affected?
-5. **When** should this be prioritized?
-
-Structure your response as follows:
-
-## Quick Summary
-Provide a 2-3 sentence overview that captures the essence of the issue/PR.
-
-## Key Changes
-- List the most important changes or requests (max 5 bullet points)
-- Focus on what matters for understanding, not implementation details
-
-## Impact Analysis
-- **Scope**: How much of the codebase is affected?
-- **Risk**: What could go wrong? (Low/Medium/High)
-- **Dependencies**: What else might this affect?
-
-## Critical Questions
-List 3-5 questions that should be answered before proceeding. Focus on:
-- Unclear requirements or edge cases
-- Potential technical debt or design concerns
-- Testing or deployment considerations
-
-## Bottom Line
-In one paragraph, give your assessment: Is this ready to proceed? What are the main concerns? What's the recommended next step?
-
-Remember: The goal is rapid understanding, not deep technical analysis. Be direct and practical.
+Goal: Rapid understanding, not deep analysis. Be direct and practical.

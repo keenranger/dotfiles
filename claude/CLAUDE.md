@@ -1,6 +1,6 @@
 ## Engineering Philosophy
 - Minimize code and code changes - the best code is no code, the best change is the smallest change
-- Agent instructions need to be detailed since they become system prompts - verbosity here prevents ambiguity in execution
+- Agent instructions should be clear but not rigid or verbose - focus on goals and principles, not prescriptive workflows that constrain reasoning
 
 ## Git and Version Control
 - I always want to make signed commit
