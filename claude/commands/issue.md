@@ -1,8 +1,13 @@
 Create a GitHub issue for: $ARGUMENTS
 
+Agent usage:
+
+- Use issue-creator agent for issue creation
+
 Title: Start with action verb (Fix, Add, Update, Remove, Implement). Be specific, 50-70 characters. Include component/area.
 
 Structure:
+
 - Description (2-4 sentences: problem/feature, why it matters, impact)
 - Current behavior (for bugs: what happens now, error messages, repro steps)
 - Expected behavior (desired outcome, acceptance criteria)

@@ -1,8 +1,13 @@
 Create a GitHub PR for: $ARGUMENTS
 
+Agent usage:
+
+- Use pr-creator agent for PR creation
+
 Use conventional commit format for title (feat:, fix:, docs:). Be specific, 50-70 characters. Include issue number if relevant.
 
 Structure the PR description with:
+
 - Summary (2-3 sentences: what, why, approach)
 - Key changes (3-7 bullets, highlight breaking changes)
 - Type of change (bug fix, feature, breaking change, docs, refactor, performance)
