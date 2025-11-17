@@ -63,6 +63,10 @@ set_zsh(){
 	gh extension install github/gh-copilot
 	sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
 		https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+
+	# Configure brew autoupdate for daily automatic updates
+	brew tap homebrew/autoupdate
+	brew autoupdate start 86400 --upgrade --cleanup
 }
 
 set_mac(){
