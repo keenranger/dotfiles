@@ -12,3 +12,7 @@
 
 ## Python Development
 - Always use uv pip install instead of pip install
+
+## Agent Usage
+- Use the research agent when fetching external documentation or references to avoid context bloat
+- Research agent should gather, filter, and return only essential information from external sources
