@@ -139,3 +139,6 @@ cci() { command claude "/issue $@"; }
 ccp() { command claude "/pr $@"; }
 ccr() { command claude "/review $@"; }
 
+
+# Added by Antigravity
+export PATH="/Users/mark/.antigravity/antigravity/bin:$PATH"
