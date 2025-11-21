@@ -18,3 +18,5 @@
 
 ## Python Development
 - Always use uv pip install instead of pip install
+- Prefer httpx over requests for HTTP requests
+- Use ruff for linting and formatting (not black or other tools)
