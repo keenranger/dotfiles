@@ -1,8 +1,9 @@
-## Agent Usage
 - Use agents for all exploration and information gathering tasks to minimize context use
+## Agent Usage
 - The research agent is the default choice for any exploration - both external documentation and internal codebase
 - Research agent should gather, filter, and return only essential information
 - Delegate to agents rather than doing multi-step searches directly in the main context
+- Use multiple agents in parallel when possible for faster execution
 
 ## Engineering Philosophy
 - Minimize code and code changes - the best code is no code, the best change is the smallest change
