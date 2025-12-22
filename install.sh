@@ -19,12 +19,14 @@ create_symlinks(){
 	[ -e "$HOME/.claude/commands" ] && rm -rf "$HOME/.claude/commands"
 	[ -e "$HOME/.claude/hooks" ] && rm -rf "$HOME/.claude/hooks"
 	[ -e "$HOME/.claude/agents" ] && rm -rf "$HOME/.claude/agents"
+	[ -e "$HOME/.claude/skills" ] && rm -rf "$HOME/.claude/skills"
 	[ -e "$HOME/.claude/settings.json" ] && rm -f "$HOME/.claude/settings.json"
 	# Create symlinks for all Claude files
 	ln -sf "$SRCDIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 	ln -sf "$SRCDIR/claude/commands" "$HOME/.claude/commands"
 	ln -sf "$SRCDIR/claude/hooks" "$HOME/.claude/hooks"
 	ln -sf "$SRCDIR/claude/agents" "$HOME/.claude/agents"
+	ln -sf "$SRCDIR/claude/skills" "$HOME/.claude/skills"
 	ln -sf "$SRCDIR/claude/settings.json" "$HOME/.claude/settings.json"
 }
 
