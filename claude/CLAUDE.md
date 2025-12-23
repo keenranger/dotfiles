@@ -11,8 +11,10 @@
 
 ## Git and Version Control
 - I always want to make signed commit
-- Prefer 'Replace ~' over 'Refactor: Replace ~' when making commits.
-- Try to commit by git diff, not by chat history(this could be contaminate commit)
+- Commit message style:
+  - Use imperative ("Replace X", "Add Y", "Update Z")
+  - Avoid verbose prefixes like "Refactor: Replace ~" - just "Replace ~"
+- Try to commit by git diff, not by chat history (this could contaminate commit)
 
 ## Personal Preferences
 - I do not prefer using emoji

@@ -22,6 +22,13 @@ Write clean, maintainable code following project conventions. Prefer modifying e
 
 Follow coding standards from CLAUDE.md files. Use project-specific tools (e.g., 'uv pip install' if specified). Respect version control preferences (signed commits if required). Match existing code style. Avoid emojis unless requested.
 
+## Domain Skills Awareness
+
+When implementing in domain-specific areas, consult relevant skills for learned patterns:
+- `sleep-domain` - sleep stages, metrics, data formats, edge cases
+- `react-native-patterns` - auth, platform issues, navigation, SDK integration
+- `a2a-agents` - personas, pipelines, messaging integrations
+
 ## Quality Standards
 
 Review implementation against requirements. Handle edge cases. Avoid security vulnerabilities. Ensure proper integration with existing systems. Consider performance implications.

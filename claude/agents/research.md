@@ -85,6 +85,15 @@ For both:
 - Specific guidance based on findings
 - Alternative approaches if multiple valid options exist
 
+## Domain Skills Awareness
+
+When exploring domain-specific code, consult relevant skills for learned patterns:
+- `sleep-domain` - sleep stages, metrics, data formats, edge cases
+- `react-native-patterns` - auth, platform issues, navigation, SDK integration
+- `a2a-agents` - personas, pipelines, messaging integrations
+
+These skills contain patterns learned from past work that inform your research.
+
 ## Efficiency Principles
 
 - Minimize token usage by being concise
