@@ -26,6 +26,11 @@ create_symlinks(){
 	# Remove existing nvim symlink to prevent recursive linking
 	[ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
 	ln -sf "$SRCDIR/config/nvim" "$HOME/.config/nvim"
+	# Karabiner configuration (macOS only)
+	if [[ "$(uname)" = "Darwin" ]]; then
+		mkdir -p "$HOME/.config/karabiner"
+		ln -sf "$SRCDIR/config/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json"
+	fi
 	# Claude configuration
 	mkdir -p "$HOME/.claude"
 	# Remove existing symlinks only if they exist
@@ -98,8 +103,35 @@ set_zsh(){
 
 set_mac(){
 	ensure_homebrew
-	brew install --cask iterm2 rectangle
+	brew install --cask iterm2 rectangle karabiner-elements
 	brew install terminal-notifier
+}
+
+set_keyboard(){
+	# macOS only: Configure Korean/English input sources and F18 shortcut
+	[[ "$(uname)" != "Darwin" ]] && return
+
+	echo "Configuring keyboard input sources..."
+
+	# Add Korean (두벌식) input source if not already present
+	if ! defaults read com.apple.HIToolbox AppleEnabledInputSources 2>/dev/null | grep -q "Korean.2SetKorean"; then
+		defaults write com.apple.HIToolbox AppleEnabledInputSources -array-add '{
+			"Bundle ID" = "com.apple.inputmethod.Korean";
+			"Input Mode" = "com.apple.inputmethod.Korean.2SetKorean";
+			InputSourceKind = "Input Mode";
+		}'
+	fi
+
+	# Set F18 (keycode 79) for "Select next source in Input menu" (hotkey ID 61)
+	defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 '{
+		enabled = 1;
+		value = {
+			parameters = (65535, 79, 0);
+			type = standard;
+		};
+	}'
+
+	echo "Keyboard configured. Please logout/restart for changes to take effect."
 }
 
 set_cloud(){

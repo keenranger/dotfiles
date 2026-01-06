@@ -105,8 +105,8 @@ export FZF_CTRL_R_OPTS="
   --color header:italic
   --header 'Press CTRL-Y to copy command into clipboard'"
 
-. "$HOME/.cargo/env"
-export PATH="$HOME/.rye/shims:$PATH"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+[ -d "$HOME/.rye/shims" ] && export PATH="$HOME/.rye/shims:$PATH"
 
 # For podman
 export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
