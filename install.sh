@@ -117,13 +117,18 @@ set_keyboard(){
 	echo "Configuring keyboard shortcut..."
 
 	# Set F18 (keycode 79) for "Select next source in Input menu" (hotkey ID 61)
-	defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 '{
-		enabled = 1;
-		value = {
-			parameters = (65535, 79, 0);
-			type = standard;
-		};
-	}'
+	# Using PlistBuddy for correct types (defaults write creates strings instead of integers)
+	# 8388608 (0x800000) is the fn key modifier required for F-keys on macOS
+	local PLIST=~/Library/Preferences/com.apple.symbolichotkeys.plist
+	/usr/libexec/PlistBuddy -c "Delete :AppleSymbolicHotKeys:61" "$PLIST" 2>/dev/null || true
+	/usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:61 dict" "$PLIST"
+	/usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:61:enabled bool true" "$PLIST"
+	/usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:61:value dict" "$PLIST"
+	/usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:61:value:type string standard" "$PLIST"
+	/usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:61:value:parameters array" "$PLIST"
+	/usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:61:value:parameters:0 integer 65535" "$PLIST"
+	/usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:61:value:parameters:1 integer 79" "$PLIST"
+	/usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:61:value:parameters:2 integer 8388608" "$PLIST"
 
 	# Apply changes instantly
 	killall cfprefsd 2>/dev/null
