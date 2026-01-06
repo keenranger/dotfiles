@@ -143,7 +143,7 @@ container(){
 if [ $# = 0 ]; then
 	set_zsh
 	create_symlinks
-	if [[ "$CHECK_OS" = "Darwin"* ]]; then
+	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		set_mac
 	fi
 else
