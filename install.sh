@@ -92,7 +92,6 @@ set_zsh(){
 	[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ] && git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 	[ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ] && git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions"
 	/bin/sh -c "$(curl -fsSL https://astral.sh/uv/install.sh)"
-	gh extension install github/gh-copilot
 	sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
 		https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
@@ -105,6 +104,7 @@ set_mac(){
 	ensure_homebrew
 	brew install --cask iterm2 rectangle karabiner-elements
 	brew install terminal-notifier
+	set_keyboard
 }
 
 set_keyboard(){
