@@ -108,19 +108,12 @@ set_mac(){
 }
 
 set_keyboard(){
-	# macOS only: Configure Korean/English input sources and F18 shortcut
+	# macOS only: Configure F18 as input source shortcut
+	# NOTE: Adding input sources via defaults write is unreliable on modern macOS
+	#       Add Korean (두벌식) manually: System Settings > Keyboard > Input Sources
 	[[ "$(uname)" != "Darwin" ]] && return
 
-	echo "Configuring keyboard input sources..."
-
-	# Add Korean (두벌식) input source if not already present
-	if ! defaults read com.apple.HIToolbox AppleEnabledInputSources 2>/dev/null | grep -q "Korean.2SetKorean"; then
-		defaults write com.apple.HIToolbox AppleEnabledInputSources -array-add '{
-			"Bundle ID" = "com.apple.inputmethod.Korean";
-			"Input Mode" = "com.apple.inputmethod.Korean.2SetKorean";
-			InputSourceKind = "Input Mode";
-		}'
-	fi
+	echo "Configuring keyboard shortcut..."
 
 	# Set F18 (keycode 79) for "Select next source in Input menu" (hotkey ID 61)
 	defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 '{
@@ -131,7 +124,11 @@ set_keyboard(){
 		};
 	}'
 
-	echo "Keyboard configured. Please logout/restart for changes to take effect."
+	# Apply changes instantly
+	killall cfprefsd 2>/dev/null
+	/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+
+	echo "F18 shortcut configured for input source switching."
 }
 
 set_cloud(){
