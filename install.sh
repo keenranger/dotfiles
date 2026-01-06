@@ -50,6 +50,7 @@ set_zsh(){
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		# macOS installation
 		brew install zsh fzf ripgrep bat gh neovim
+		brew install --cask font-meslo-lg-nerd-font
 	else
 		# Linux installation
 		sudo apt update
@@ -90,7 +91,7 @@ set_zsh(){
 
 set_mac(){
 	ensure_homebrew
-	brew install --cask rectangle
+	brew install --cask iterm2 rectangle
 	brew install terminal-notifier
 }
 
