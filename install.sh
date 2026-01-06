@@ -97,6 +97,7 @@ set_zsh(){
 
 	# Configure brew autoupdate for daily automatic updates
 	brew tap homebrew/autoupdate
+	brew autoupdate delete 2>/dev/null || true
 	brew autoupdate start 86400 --upgrade --cleanup
 }
 
