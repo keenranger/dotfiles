@@ -26,10 +26,14 @@ create_symlinks(){
 	# Remove existing nvim symlink to prevent recursive linking
 	[ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
 	ln -sf "$SRCDIR/config/nvim" "$HOME/.config/nvim"
-	# Karabiner configuration (macOS only)
+	# macOS only configurations
 	if [[ "$(uname)" = "Darwin" ]]; then
 		mkdir -p "$HOME/.config/karabiner"
 		ln -sf "$SRCDIR/config/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json"
+		mkdir -p "$HOME/.gnupg"
+		chmod 700 "$HOME/.gnupg"
+		ln -sf "$SRCDIR/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
+		ln -sf "$SRCDIR/gnupg/common.conf" "$HOME/.gnupg/common.conf"
 	fi
 	# Claude configuration
 	mkdir -p "$HOME/.claude"
@@ -54,7 +58,7 @@ set_zsh(){
 
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		# macOS installation
-		brew install zsh fzf ripgrep bat gh neovim tmux
+		brew install zsh fzf ripgrep bat gh neovim tmux gnupg pinentry-mac
 		brew install --cask font-meslo-lg-nerd-font
 	else
 		# Linux installation
