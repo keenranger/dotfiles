@@ -166,6 +166,50 @@ set_claude(){
 	curl -fsSL https://claude.ai/install.sh | bash
 }
 
+set_gpg(){
+	# Configure GPG for git commit signing (shared key approach)
+	# Usage:
+	#   ./install.sh set_gpg              - configure git with existing key
+	#   ./install.sh set_gpg export       - export private key to ./private.key
+	#   ./install.sh set_gpg import FILE  - import key, trust, configure, delete file
+
+	case "${1:-}" in
+		export)
+			KEY_ID=$(gpg --list-secret-keys --keyid-format=long 2>/dev/null | awk -F'/' '/^sec/{print $2}' | cut -d' ' -f1 | head -1)
+			[ -z "$KEY_ID" ] && { echo "No key to export"; return 1; }
+			gpg --export-secret-keys --armor "$KEY_ID" > private.key
+			echo "Exported to ./private.key - transfer securely and delete"
+			return 0
+			;;
+		import)
+			[ -z "${2:-}" ] || [ ! -f "${2:-}" ] && { echo "Usage: set_gpg import FILE"; return 1; }
+			gpg --import "$2"
+			FINGERPRINT=$(gpg --list-secret-keys --with-colons 2>/dev/null | awk -F: '/^fpr/{print $10; exit}')
+			echo "$FINGERPRINT:6:" | gpg --import-ownertrust
+			rm -P "$2" 2>/dev/null || shred -u "$2" 2>/dev/null || rm "$2"
+			echo "Key imported, trusted, file deleted"
+			;;
+	esac
+
+	KEY_ID=$(gpg --list-secret-keys --keyid-format=long 2>/dev/null | awk -F'/' '/^sec/{print $2}' | cut -d' ' -f1 | head -1)
+
+	if [ -z "$KEY_ID" ]; then
+		echo "No GPG key found. Usage:"
+		echo "  ./install.sh set_gpg import /path/to/private.key"
+		return 1
+	fi
+
+	git config --global user.signingkey "$KEY_ID"
+	git config --global commit.gpgsign true
+	git config --global tag.gpgsign true
+	[[ "$(uname)" = "Darwin" ]] && git config --global gpg.program /opt/homebrew/bin/gpg
+
+	gpgconf --kill gpg-agent
+
+	echo "Configured signing with key: $KEY_ID"
+	echo "Upload to GitHub: gpg --armor --export $KEY_ID | gh gpg-key add -"
+}
+
 container(){
 	ensure_homebrew
 	if [[ "$(uname)" = "Darwin" ]]; then
@@ -192,6 +236,8 @@ if [ $# = 0 ]; then
 		set_mac
 	fi
 else
-	$1
+	func=$1
+	shift
+	$func "$@"
 fi
 
