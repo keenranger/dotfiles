@@ -49,12 +49,12 @@ set_zsh(){
 
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		# macOS installation
-		brew install zsh fzf ripgrep bat gh neovim
+		brew install zsh fzf ripgrep bat gh neovim tmux
 		brew install --cask font-meslo-lg-nerd-font
 	else
 		# Linux installation
 		sudo apt update
-		sudo apt install -y zsh build-essential curl neovim
+		sudo apt install -y zsh build-essential curl neovim tmux
 
 		# Install GitHub CLI on Linux
 		type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
