@@ -84,7 +84,6 @@ export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
 export TERM=xterm-256color
-alias tmux="tmux -2"
 
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.3.2/bin/terraform terraform
@@ -135,9 +134,6 @@ export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 
 cc() { command claude "$@"; }
-cci() { command claude "/issue $@"; }
-ccp() { command claude "/pr $@"; }
-ccr() { command claude "/review $@"; }
 
 
 # Added by Antigravity
