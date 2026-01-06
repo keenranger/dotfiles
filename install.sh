@@ -4,11 +4,25 @@ set -euo pipefail
 SRCDIR=$(pwd)
 CHECK_OS=$(uname)
 
+ensure_homebrew(){
+	if ! command -v brew &> /dev/null; then
+		echo "Installing Homebrew..."
+		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+		if [[ "$CHECK_OS" = "Darwin" ]]; then
+			eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"
+		else
+			eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+		fi
+	fi
+}
+
 create_symlinks(){
 	echo "creating symlinks"
 	ln -sf "$SRCDIR/vimrc" "$HOME/.vimrc"
 	ln -sf "$SRCDIR/tmux.conf" "$HOME/.tmux.conf"
 	ln -sf "$SRCDIR/zshrc" "$HOME/.zshrc"
+	# Ensure .config directory exists
+	mkdir -p "$HOME/.config"
 	# Remove existing nvim symlink to prevent recursive linking
 	[ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
 	ln -sf "$SRCDIR/config/nvim" "$HOME/.config/nvim"
@@ -31,15 +45,16 @@ create_symlinks(){
 }
 
 set_zsh(){
+	ensure_homebrew
+
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		# macOS installation
-		brew install zsh
-		brew install fzf ripgrep bat gh neovim
+		brew install zsh fzf ripgrep bat gh neovim
 	else
 		# Linux installation
 		sudo apt update
 		sudo apt install -y zsh build-essential curl neovim
-		
+
 		# Install GitHub CLI on Linux
 		type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
 		curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -47,16 +62,18 @@ set_zsh(){
 		&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
 		&& sudo apt update \
 		&& sudo apt install gh -y
-		
-		# Install Homebrew on Linux
-		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-		eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
 		brew install fzf ripgrep bat
 	fi
-	
-	# Common installations for both platforms
-	chsh -s $(which zsh)
-	/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+	# Add zsh to /etc/shells if not present (fixes "non-standard shell" error)
+	ZSH_PATH=$(command -v zsh)
+	if ! grep -qx "$ZSH_PATH" /etc/shells; then
+		echo "Adding $ZSH_PATH to /etc/shells"
+		echo "$ZSH_PATH" | sudo tee -a /etc/shells
+	fi
+	chsh -s "$ZSH_PATH"
+	RUNZSH=no CHSH=no /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 	git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
@@ -72,11 +89,13 @@ set_zsh(){
 }
 
 set_mac(){
+	ensure_homebrew
 	brew install --cask rectangle
 	brew install terminal-notifier
 }
 
 set_cloud(){
+	ensure_homebrew
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		# macOS installation
 		brew install awscli opentofu
@@ -96,6 +115,7 @@ set_cloud(){
 }
 
 container(){
+	ensure_homebrew
 	if [[ "$(uname)" = "Darwin" ]]; then
 		# macOS installation
 		brew install podman podman-compose
