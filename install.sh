@@ -157,6 +157,11 @@ set_cloud(){
 	fi
 }
 
+set_claude(){
+	echo "Installing Claude Code..."
+	curl -fsSL https://claude.ai/install.sh | bash
+}
+
 container(){
 	ensure_homebrew
 	if [[ "$(uname)" = "Darwin" ]]; then
@@ -178,6 +183,7 @@ container(){
 if [ $# = 0 ]; then
 	set_zsh
 	create_symlinks
+	set_claude
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		set_mac
 	fi
