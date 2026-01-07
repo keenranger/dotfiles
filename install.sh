@@ -58,23 +58,19 @@ set_zsh(){
 
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		# macOS installation
-		brew install zsh fzf ripgrep bat gh neovim tmux gnupg pinentry-mac
+		brew install zsh fzf ripgrep bat gh neovim tmux gnupg pinentry-mac fnm pnpm
 		brew install --cask font-meslo-lg-nerd-font
 	else
 		# Linux installation
 		sudo apt update
-		sudo apt install -y zsh build-essential curl neovim tmux
-
-		# Install GitHub CLI on Linux
-		type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
-		curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-		&& sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-		&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-		&& sudo apt update \
-		&& sudo apt install gh -y
-
-		brew install fzf ripgrep bat
+		sudo apt install -y build-essential curl
+		brew install zsh fzf ripgrep bat gh neovim tmux gnupg fnm pnpm
 	fi
+
+	# Setup fnm with Node LTS
+	eval "$(fnm env)"
+	fnm install --lts
+	fnm default lts-latest
 
 	# Add zsh to /etc/shells if not present (fixes "non-standard shell" error)
 	ZSH_PATH=$(command -v zsh)
@@ -82,7 +78,9 @@ set_zsh(){
 		echo "Adding $ZSH_PATH to /etc/shells"
 		echo "$ZSH_PATH" | sudo tee -a /etc/shells
 	fi
-	chsh -s "$ZSH_PATH"
+	if [[ "$SHELL" != "$ZSH_PATH" ]]; then
+		chsh -s "$ZSH_PATH"
+	fi
 
 	# Install Oh My Zsh if not already installed
 	if [ ! -d "$HOME/.oh-my-zsh" ]; then
@@ -162,6 +160,10 @@ set_cloud(){
 }
 
 set_claude(){
+	if command -v claude &> /dev/null; then
+		echo "Claude Code already installed, skipping"
+		return 0
+	fi
 	echo "Installing Claude Code..."
 	curl -fsSL https://claude.ai/install.sh | bash
 }

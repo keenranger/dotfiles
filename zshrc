@@ -135,6 +135,5 @@ export PATH=$PATH:$ANDROID_HOME/platform-tools
 
 cc() { command claude "$@"; }
 
-
 # Added by Antigravity
 export PATH="/Users/mark/.antigravity/antigravity/bin:$PATH"
