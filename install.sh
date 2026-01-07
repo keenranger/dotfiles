@@ -166,6 +166,12 @@ set_claude(){
 	curl -fsSL https://claude.ai/install.sh | bash
 }
 
+set_git(){
+	git config --global user.name "Hankyeol Kyung"
+	git config --global user.email "kghnkl0103@gmail.com"
+	echo "Git configured: Hankyeol Kyung <kghnkl0103@gmail.com>"
+}
+
 set_gpg(){
 	# Configure GPG for git commit signing (shared key approach)
 	# Usage:
@@ -230,6 +236,7 @@ container(){
 
 if [ $# = 0 ]; then
 	set_zsh
+	set_git
 	create_symlinks
 	set_claude
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
