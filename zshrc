@@ -128,10 +128,31 @@ esac
 command -v fnm >/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
 export PATH="$HOME/.npm-global/bin:$PATH"
 
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
-export ANDROID_HOME=$HOME/Library/Android/sdk
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDROID_HOME/platform-tools
+# Android development
+if [[ "$(uname)" == "Darwin" ]]; then
+    export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+    export ANDROID_HOME="$HOME/Library/Android/sdk"
+else
+    # WSL2: OpenJDK via apt, SDK via cmdline-tools
+    export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
+    export ANDROID_HOME="$HOME/Android/Sdk"
+fi
+
+if [[ -d "$ANDROID_HOME" ]]; then
+    export PATH="$PATH:$ANDROID_HOME/emulator"
+    export PATH="$PATH:$ANDROID_HOME/platform-tools"
+fi
+
+# Connect to Android emulator running on Windows (WSL2 only)
+adb-connect-windows() {
+    if [[ "$(uname)" == "Linux" ]] && grep -qi microsoft /proc/version 2>/dev/null; then
+        local windows_ip=$(awk '/nameserver/ {print $2}' /etc/resolv.conf)
+        adb kill-server
+        adb connect "$windows_ip:5555"
+    else
+        echo "Not running in WSL2"
+    fi
+}
 
 cc() { command claude "$@"; }
 
