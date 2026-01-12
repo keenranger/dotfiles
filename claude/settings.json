@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(git status:*)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:github.com)"
     ]
   },
   "hooks": {
