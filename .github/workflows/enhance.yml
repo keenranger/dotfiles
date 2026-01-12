@@ -1,0 +1,48 @@
+name: Daily Enhance
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: enhance
+  cancel-in-progress: true
+
+jobs:
+  enhance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Claude config
+        run: |
+          mkdir -p ~/.claude
+          for item in CLAUDE.md commands hooks agents skills settings.json; do
+            [ -e "claude/$item" ] && ln -sf "$PWD/claude/$item" ~/.claude/
+          done
+          ls -la ~/.claude/
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Improve this dotfiles repository's Claude configuration.
+
+            Process:
+            1. Review claude/ config (skills, agents, commands, CLAUDE.md)
+            2. Analyze my GitHub activity across repos
+            3. Identify gaps between config and actual work
+
+            PR criteria (be skeptical):
+            - Only create PR for HIGH-VALUE improvements
+            - Must solve real friction or capture important patterns
+            - No PR is better than a low-value PR
+            - Minor tweaks can be attached if PR is already justified by high-value changes
+
+            If no significant improvements found, just report findings without PR.
