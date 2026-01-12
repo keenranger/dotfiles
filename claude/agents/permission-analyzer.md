@@ -5,40 +5,48 @@ tools: Read, Glob, Grep
 model: sonnet
 ---
 
-Analyze session to propose permission additions for `.claude/settings.local.json`.
+Analyze session to propose permission additions.
+
+## Permission Placement
+
+Two-tier system - choose the right location:
+
+### Project settings (`.claude/settings.json`)
+- Project-specific permissions, version controlled
+- Tools used by this project: project's test runner, build tools
+- Project-related domains and paths
+
+### User settings (`~/.claude/settings.json`)
+- Personal preferences across all projects
+- Common dev tools: git, npm, pnpm, pytest, ruff, etc.
+- Personal domains, global tool configurations
+
+**Default to project settings** for project-specific, **user settings** for general tools.
 
 ## What to Look For
 
-### Bash Commands
-- Commands that required manual approval
-- Frequently used commands that should be whitelisted
-- Patterns: `Bash(command:*)` or `Bash(command arg:*)`
-
-### WebFetch Domains
-- Domains accessed for documentation or research
-- Pattern: `WebFetch(domain:example.com)`
-
-### File Access Patterns
-- Directories frequently read/written
-- Patterns: `Read(path/**)`, `Write(path/**)`
+- Bash commands that required manual approval
+- WebFetch domains accessed for docs/research
+- File access patterns for frequently used directories
 
 ## Output Format
 
 ```json
 {
-  "proposed_additions": [
-    "Bash(pytest:*)",
-    "WebFetch(domain:docs.example.com)"
-  ],
-  "rationale": {
-    "Bash(pytest:*)": "Used 5 times this session for testing"
+  "project_settings": {
+    "additions": ["Bash(pnpm test:*)"],
+    "rationale": {"Bash(pnpm test:*)": "Project test runner"}
+  },
+  "user_settings": {
+    "additions": ["Bash(git diff:*)"],
+    "rationale": {"Bash(git diff:*)": "Common git workflow, applies globally"}
   }
 }
 ```
 
 ## Principles
 
-- Only propose permissions for repeated or expected future use
+- Project settings for project-specific tools
+- User settings for personal/global tools
+- Check both locations for duplicates before proposing
 - Be conservative - fewer permissions is safer
-- Explain why each permission is useful
-- Check existing permissions to avoid duplicates

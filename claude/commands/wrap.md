@@ -24,8 +24,13 @@ Focus areas:
 
 Duplicate check:
 
-- Before proposing, agents must check existing content (CLAUDE.md, settings.local.json, skills/, commands/, agents/)
+- Before proposing, check both project (`.claude/`) and user (`~/.claude/`) locations
 - Skip proposals that duplicate existing content
+
+Permission placement:
+
+- Project settings (`.claude/settings.json`) for project-specific permissions
+- User settings (`~/.claude/settings.json`) for personal/global tools
 
 Output:
 
