@@ -1,68 +1,26 @@
 #!/usr/bin/env python3
+"""Notify when Claude task completes."""
 
-import os
-import sys
-import subprocess
 import json
+import sys
+
+from notify_utils import get_project_name, send_notification
+
 
 def main():
-    # Read JSON input from stdin
     try:
-        hook_input = json.load(sys.stdin)
-    except:
+        json.load(sys.stdin)  # Consume stdin, content not needed
+    except Exception:
         return 0
-    
-    # Check if this is a Stop event
-    if hook_input.get('hook_event_name') != 'Stop':
-        return 0
-    
+
     try:
-        # Get context for notification
-        cwd = os.getcwd()
-        project_name = os.path.basename(cwd)
-        
-        # macOS notification using terminal-notifier
-        if sys.platform == 'darwin':
-            try:
-                # Check if terminal-notifier is installed
-                result = subprocess.run(['which', 'terminal-notifier'], capture_output=True)
-                if result.returncode == 0:
-                    # Use terminal-notifier
-                    subprocess.run([
-                        'terminal-notifier',
-                        '-title', f'CC - {project_name}',
-                        '-message', 'Task completed',
-                        '-sound', 'Purr',
-                        '-group', 'claude-code-hooks'
-                    ], check=False)
-                else:
-                    # Fallback to osascript
-                    subprocess.run([
-                        'osascript', '-e',
-                        f'display notification "Task completed" with title "CC - {project_name}" sound name "Purr"'
-                    ], check=False)
-            except:
-                pass
-        
-        # Linux notification (requires notify-send)
-        elif sys.platform.startswith('linux'):
-            try:
-                subprocess.run([
-                    'notify-send', 
-                    f'CC - {project_name}', 
-                    'Task completed',
-                    '--urgency=normal'
-                ], check=False)
-            except:
-                pass
-        
-        # Terminal bell
-        print('\a', end='', flush=True)
-    
-    except:
+        title = f"CC - {get_project_name()}"
+        send_notification(title, "Task completed", sound="Purr")
+    except Exception:
         pass
-    
+
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
