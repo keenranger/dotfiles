@@ -23,3 +23,8 @@
 - Always use uv pip install instead of pip install
 - Prefer httpx over requests for HTTP requests
 - Use ruff for linting and formatting (not black or other tools)
+
+## TypeScript Development
+- pnpm for web, yarn for React Native
+- Biome for new projects (ESLint + Prettier in existing)
+- Strict TypeScript (noUnusedLocals, noUnusedParameters)
