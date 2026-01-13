@@ -1,10 +1,6 @@
-Wrap up session: $ARGUMENTS
+Pre-commit session analysis: $ARGUMENTS
 
-End-of-session reflection and capture.
-
-Quick mode:
-
-- If $ARGUMENTS contains a commit message, create signed commit directly and skip analysis
+Analyze session for documentation and permission updates before committing.
 
 Agent usage:
 
@@ -42,7 +38,7 @@ Output:
 User selection:
 
 - Present options via AskUserQuestion
-- Options: commit changes, update CLAUDE.md, add permissions, create automations, skip
+- Options: update CLAUDE.md, add permissions, create automations, skip
 - Execute only selected actions
 
-Goal: Make session wrap-up a habit that enriches configuration over time.
+Goal: Enrich configuration before each commit.
