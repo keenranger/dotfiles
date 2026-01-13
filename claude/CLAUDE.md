@@ -23,6 +23,7 @@
 - Always use uv pip install instead of pip install
 - Prefer httpx over requests for HTTP requests
 - Use ruff for linting and formatting (not black or other tools)
+- Prefer uvx ty for type checking instead of mypy
 
 ## TypeScript Development
 - pnpm for web, yarn for React Native
