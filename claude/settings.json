@@ -4,6 +4,10 @@
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git add:*)",
+      "Bash(gh search:*)",
+      "Bash(gh repo list:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:github.com)"
     ]
