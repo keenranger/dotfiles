@@ -11,6 +11,14 @@
       "Bash(gh run view:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr diff:*)",
+      "Bash(git log:*)",
+      "Bash(gh api:*)",
+      "Bash(gh release list:*)",
+      "Bash(gh release view:*)",
+      "Bash(gh release download:*)",
+      "Bash(cat > *)",
+      "Bash(mkdir -p:*)",
+      "Bash(uv run:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:github.com)"
     ]

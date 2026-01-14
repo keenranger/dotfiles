@@ -7,6 +7,7 @@
 
 ## Engineering Philosophy
 - Minimize code and code changes - the best code is no code, the best change is the smallest change
+- Prefer native tool behavior over custom scripts - use tools as designed rather than adding wrappers
 - Agent instructions should be clear but not rigid or verbose - focus on goals and principles, not prescriptive workflows that constrain reasoning
 
 ## Git and Version Control
