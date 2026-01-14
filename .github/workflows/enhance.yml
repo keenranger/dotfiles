@@ -39,7 +39,7 @@ jobs:
 
             Process:
             1. Review claude/ config (skills, agents, commands, CLAUDE.md)
-            2. Analyze my GitHub activity (gh search issues/prs, gh repo list, sort by date desc)
+            2. Analyze my GitHub activity (gh search issues/prs --author=keenranger, gh repo list, sort by date desc)
             3. Identify gaps between config and actual work
 
             PR criteria (be skeptical):
