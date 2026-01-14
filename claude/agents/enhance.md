@@ -21,7 +21,8 @@ When called with session context (e.g., from /wrap):
 - Focus on session-specific improvements
 
 When called directly (e.g., /enhance):
-- Use GitHub CLI (`gh repo list`, `gh search prs`) for work patterns
+- Use GitHub CLI (`gh repo list`, `gh search prs --author=keenranger`) for work patterns
+- Note: `@me` does NOT work with `gh search` - GitHub's search API requires explicit username
 - Analyze broader trends across repositories
 
 ## Configuration Locations
