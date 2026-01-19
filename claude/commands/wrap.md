@@ -7,6 +7,7 @@ Agent usage:
 - Run in parallel:
   - enhance agent: CLAUDE.md updates, automation opportunities, follow-ups
   - permission-analyzer agent: Permission whitelist proposals based on session activity
+  - retrospective agent: Session guidance analysis and workflow suggestions
 
 Pass session context to agents - they need conversation history to analyze.
 
@@ -17,6 +18,7 @@ Focus areas:
 - Permissions: Bash commands and domains used that should be whitelisted
 - Automation: Repetitive patterns that could become skills/commands/agents
 - Follow-ups: Incomplete work, TODO markers, next session priorities
+- Retrospective: User guidance patterns that could be improved
 
 Duplicate check:
 
@@ -33,6 +35,7 @@ Output:
 - Summary of session activity
 - Categorized proposals (docs, permissions, automations)
 - Follow-up tasks for next session
+- Workflow suggestions (from retrospective)
 - User selection: which proposals to apply
 
 User selection:
