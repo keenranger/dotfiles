@@ -1,3 +1,8 @@
+---
+name: code-review
+description: Review code for quality, correctness, security. Use when user asks for code review, wants feedback on changes, or says /code-review.
+---
+
 Review code: $ARGUMENTS
 
 Analyze changes for quality, correctness, and maintainability.

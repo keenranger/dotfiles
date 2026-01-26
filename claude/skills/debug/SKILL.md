@@ -1,3 +1,9 @@
+---
+name: debug
+description: Debug issues systematically, especially mobile/platform-specific. Use when user asks to debug, diagnose, troubleshoot, or says /debug.
+argument-hint: "[issue description]"
+---
+
 Debug issue: $ARGUMENTS
 
 Systematic debugging for mobile and platform-specific issues.

@@ -1,3 +1,8 @@
+---
+name: research
+description: Research topics via codebase exploration or external documentation. Use when user asks to research, explore, investigate, or says /research.
+---
+
 Research: $ARGUMENTS
 
 Explore codebase, documentation, or external references for the given topic.

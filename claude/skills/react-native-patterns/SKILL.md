@@ -1,6 +1,7 @@
 ---
 name: react-native-patterns
 description: React Native mobile development patterns for authentication, platform-specific issues, navigation, and SDK integration. Use when debugging React Native apps, fixing iOS/Android issues, handling auth flows, or integrating native SDKs.
+user-invocable: false
 ---
 
 # React Native Patterns

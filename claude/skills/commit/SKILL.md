@@ -1,3 +1,9 @@
+---
+name: commit
+description: Prepare git commit with review. Use when user asks to commit, review changes for commit, or says /commit.
+disable-model-invocation: true
+---
+
 Prepare commit: $ARGUMENTS
 
 Review current changes and prepare commit for user approval.

@@ -1,6 +1,7 @@
 ---
 name: voice-realtime
 description: Real-time voice AI knowledge including STT and TTS providers, LiveKit Agents plugins, and voice pipeline patterns. Use when working with speech-to-text, text-to-speech, voice agents, LiveKit, or any voice-related infrastructure.
+user-invocable: false
 ---
 
 # Real-time Voice AI

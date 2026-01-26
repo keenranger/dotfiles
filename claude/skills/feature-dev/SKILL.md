@@ -1,6 +1,12 @@
+---
+name: feature-dev
+description: Develop features end-to-end from planning to PR. Use when user asks to implement feature, build functionality, or says /feature-dev.
+argument-hint: "[feature description]"
+---
+
 Develop feature: $ARGUMENTS
 
-Comprehensive workflow: plan → find similar → implement → review → offer PR.
+Comprehensive workflow: plan -> find similar -> implement -> review -> offer PR.
 
 Phase 1 - Planning & Research:
 

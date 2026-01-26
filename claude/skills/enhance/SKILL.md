@@ -1,3 +1,8 @@
+---
+name: enhance
+description: Analyze work patterns and improve Claude configuration. Use when user asks to improve Claude setup, optimize workflow, or says /enhance.
+---
+
 Analyze work patterns and propose improvements to Claude configuration: $ARGUMENTS
 
 Improve how Claude helps you by analyzing your work and suggesting configuration changes.

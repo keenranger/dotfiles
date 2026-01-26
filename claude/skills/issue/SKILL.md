@@ -1,3 +1,10 @@
+---
+name: issue
+description: Create GitHub issue. Use when user asks to create issue, file bug, request feature, or says /issue.
+disable-model-invocation: true
+argument-hint: "[title or description]"
+---
+
 Create a GitHub issue for: $ARGUMENTS
 
 Agent usage:

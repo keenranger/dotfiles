@@ -1,3 +1,9 @@
+---
+name: wrap
+description: Pre-commit session analysis for docs and permissions. Use when user asks to wrap up, analyze session, or says /wrap.
+context: fork
+---
+
 Pre-commit session analysis: $ARGUMENTS
 
 Analyze session for documentation and permission updates before committing.

@@ -1,6 +1,7 @@
 ---
 name: a2a-agents
 description: AI agent and chatbot patterns including personas, pipelines, and messaging integrations. Use when building conversational agents, creating AI personas, designing insight pipelines, or integrating with Slack/Kakao platforms.
+user-invocable: false
 ---
 
 # A2A Agent Patterns

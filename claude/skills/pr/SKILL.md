@@ -1,3 +1,10 @@
+---
+name: pr
+description: Create GitHub pull request. Use when user asks to create PR, open pull request, or says /pr.
+disable-model-invocation: true
+argument-hint: "[description]"
+---
+
 Create a GitHub PR for: $ARGUMENTS
 
 Agent usage:

@@ -26,8 +26,10 @@
 - Prefer httpx over requests for HTTP requests
 - Use ruff for linting and formatting (not black or other tools)
 - Prefer uvx ty for type checking instead of mypy
+- Use uv build backend for pyproject.toml (https://docs.astral.sh/uv/concepts/build-backend/)
+- Use 127.0.0.1 instead of localhost for local servers (SAM local, etc.) - avoids DNS resolution issues
 
 ## TypeScript Development
-- pnpm for web, yarn for React Native
+- pnpm preferred (use node-linker=hoisted for React Native + NativeWind)
 - Biome for new projects (ESLint + Prettier in existing)
 - Strict TypeScript (noUnusedLocals, noUnusedParameters)

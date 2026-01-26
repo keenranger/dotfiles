@@ -1,6 +1,7 @@
 ---
 name: sleep-domain
 description: Sleep science and Asleep sleep tracking knowledge. Use when working with sleep data, hypnograms, sleep stages, sleep insights, sleep metrics, or any sleepstar/agent-a/backend sleep-related code.
+user-invocable: false
 ---
 
 # Sleep Domain Knowledge
