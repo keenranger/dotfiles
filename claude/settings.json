@@ -22,7 +22,9 @@
       "Bash(uv run:*)",
       "Bash(pnpm install:*)",
       "WebFetch(domain:docs.anthropic.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Read(~/.claude/settings.json)",
+      "Read(~/.claude/CLAUDE.md)"
     ]
   },
   "hooks": {

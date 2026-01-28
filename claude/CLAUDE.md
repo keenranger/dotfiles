@@ -33,3 +33,6 @@
 - pnpm preferred (use node-linker=hoisted for React Native + NativeWind)
 - Biome for new projects (ESLint + Prettier in existing)
 - Strict TypeScript (noUnusedLocals, noUnusedParameters)
+
+## Secrets and Keys
+- Sentry DSN is safe to expose publicly - it only allows sending events, not reading data
