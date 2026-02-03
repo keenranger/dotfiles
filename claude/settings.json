@@ -20,6 +20,8 @@
       "Bash(cat > *)",
       "Bash(mkdir -p:*)",
       "Bash(uv run:*)",
+      "Bash(uvx ruff:*)",
+      "Bash(uvx ty:*)",
       "Bash(pnpm install:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:github.com)",
@@ -66,5 +68,8 @@
       }
     ]
   },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": true,
+  "enabledPlugins": {
+    "swift-lsp@claude-plugins-official": true
+  }
 }

@@ -36,3 +36,10 @@
 
 ## Secrets and Keys
 - Sentry DSN is safe to expose publicly - it only allows sending events, not reading data
+
+## Figma MCP
+When implementing designs from Figma:
+1. `get_metadata` - Get XML structure overview (node IDs, names, positions, sizes)
+2. `get_design_context` - Get implementation details with `data-annotations` containing designer notes
+
+Always use both: metadata for structure, design_context for annotations and implementation hints.
