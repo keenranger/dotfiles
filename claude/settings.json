@@ -41,6 +41,10 @@
           {
             "type": "command",
             "command": "uv run --no-project $HOME/.claude/hooks/substitute-pip-with-uv.py"
+          },
+          {
+            "type": "command",
+            "command": "uv run --no-project $HOME/.claude/hooks/validate-config.py"
           }
         ]
       }
@@ -68,8 +72,11 @@
       }
     ]
   },
-  "alwaysThinkingEnabled": true,
   "enabledPlugins": {
-    "swift-lsp@claude-plugins-official": true
-  }
+    "swift-lsp@claude-plugins-official": true,
+    "example-skills@anthropic-agent-skills": true,
+    "device-control@asleep-internal-skills": true,
+    "sleep@asleep-internal-skills": true
+  },
+  "alwaysThinkingEnabled": true
 }
