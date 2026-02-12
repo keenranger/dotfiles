@@ -105,7 +105,7 @@ set_zsh(){
 
 set_mac(){
 	ensure_homebrew
-	brew install --cask iterm2 ghostty rectangle karabiner-elements tailscale
+	brew install --cask ghostty rectangle karabiner-elements tailscale
 	brew install terminal-notifier
 	set_keyboard
 }
