@@ -1,45 +1,45 @@
-- Use agents for all exploration and information gathering tasks to minimize context use
-## Agent Usage
-- The research agent is the default choice for any exploration - both external documentation and internal codebase
-- Research agent should gather, filter, and return only essential information
-- Delegate to agents rather than doing multi-step searches directly in the main context
-- Use multiple agents in parallel when possible for faster execution
+- Delegate exploration and research to agents to minimize context use
+- No emoji
 
-## Engineering Philosophy
-- Minimize code and code changes - the best code is no code, the best change is the smallest change
-- Prefer native tool behavior over custom scripts - use tools as designed rather than adding wrappers
-- When extending libraries, inherit and override only what's needed - don't reimplement entire classes
-- Agent instructions should be clear but not rigid or verbose - focus on goals and principles, not prescriptive workflows that constrain reasoning
+## Principles
+- Trust the model's reasoning - provide outcomes, not step-by-step processes
+- Prefer native tool behavior over custom scripts
+- When extending libraries, inherit and override only what's needed
 
-## Git and Version Control
-- I always want to make signed commit
-- Commit message style:
-  - Use imperative ("Replace X", "Add Y", "Update Z")
-  - Avoid verbose prefixes like "Refactor: Replace ~" - just "Replace ~"
-- Try to commit by git diff, not by chat history (this could contaminate commit)
+## Code Discipline
+- State assumptions explicitly; when multiple interpretations exist, present options rather than picking silently
+- Push back when a simpler approach exists; self-test: "Would a senior engineer say this is overcomplicated?"
+- Match existing style, even if you'd do it differently
+- Every changed line must trace directly to the request
+- Remove imports/variables your changes made unused, but leave pre-existing dead code alone
+- For vague tasks, define verifiable success criteria before writing code - prefer test-first: write a failing test, then make it pass
+- For multi-step tasks, state the plan with explicit verification at each step
 
-## Personal Preferences
-- I do not prefer using emoji
+## Agents
+- Research agent is the default for any exploration - external docs and internal codebase
+- Use multiple agents in parallel when possible; keep instructions goal-oriented, not prescriptive
 
-## Python Development
-- Always use uv pip install instead of pip install
-- Prefer httpx over requests for HTTP requests
-- Use ruff for linting and formatting (not black or other tools)
-- Prefer uvx ty for type checking instead of mypy
-- Use uv build backend for pyproject.toml (https://docs.astral.sh/uv/concepts/build-backend/)
-- Use 127.0.0.1 instead of localhost for local servers (SAM local, etc.) - avoids DNS resolution issues
+## Git
+- Always sign commits with GPG (`git commit -S`)
+- Imperative messages: "Replace X", "Add Y" - no verbose prefixes like "Refactor: Replace ~"
+- Commit from git diff, not chat history
 
-## TypeScript Development
-- pnpm preferred (use node-linker=hoisted for React Native + NativeWind)
+## Python
+- uv pip install (not pip), uv build backend for pyproject.toml
+- httpx over requests
+- ruff for lint/format, uvx ty for type checking
+- 127.0.0.1 instead of localhost
+
+## TypeScript
+- pnpm (node-linker=hoisted for React Native + NativeWind)
 - Biome for new projects (ESLint + Prettier in existing)
-- Strict TypeScript (noUnusedLocals, noUnusedParameters)
+- Strict: noUnusedLocals, noUnusedParameters
 
-## Secrets and Keys
+## Secrets
 - Sentry DSN is safe to expose publicly - it only allows sending events, not reading data
 
 ## Figma MCP
-When implementing designs from Figma:
-1. `get_metadata` - Get XML structure overview (node IDs, names, positions, sizes)
-2. `get_design_context` - Get implementation details with `data-annotations` containing designer notes
+1. `get_metadata` - XML structure (node IDs, names, positions, sizes)
+2. `get_design_context` - implementation details with `data-annotations`
 
-Always use both: metadata for structure, design_context for annotations and implementation hints.
+Always use both: metadata for structure, design_context for annotations.
