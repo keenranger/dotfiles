@@ -1,6 +1,6 @@
 ---
-name: code-review
-description: Review code for quality, correctness, security. Use when user asks for code review, wants feedback on changes, or says /code-review.
+name: review
+description: Review code for quality, correctness, security. Use when user asks for code review, wants feedback on changes, or says /review.
 ---
 
 Review code: $ARGUMENTS
@@ -20,6 +20,7 @@ Focus areas:
 - Security: Vulnerabilities, input validation, sensitive data
 - Performance: Bottlenecks, optimization opportunities
 - Breaking changes: API changes, backward compatibility
+- Scope: Verify changes are limited to what was requested -- flag additions, refactors, or config changes beyond the stated purpose
 
 Output:
 

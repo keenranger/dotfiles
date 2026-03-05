@@ -109,11 +109,11 @@ export FZF_CTRL_R_OPTS="
 [ -d "$HOME/.rye/shims" ] && export PATH="$HOME/.rye/shims:$PATH"
 
 # For podman
-export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+export DOCKER_HOST="unix://$HOME/.local/share/containers/podman/machine/podman.sock"
 
 alias terraform="tofu"
 alias docker=podman
-alias docker-compose=podman-compose
+alias docker-compose="podman compose"
 
 export NAS_PATH="/Volumes/NAS1"
 
@@ -158,3 +158,5 @@ cc() { command claude "$@"; }
 
 # Added by Antigravity
 export PATH="/Users/mark/.antigravity/antigravity/bin:$PATH"
+export PATH="/opt/homebrew/opt/ffmpeg@7/bin:$PATH"
+# for internal skill
