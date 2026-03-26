@@ -14,7 +14,7 @@
 - Remove imports/variables your changes made unused, but leave pre-existing dead code alone
 - Write documentation and comments in English unless told otherwise
 - For vague tasks, define verifiable success criteria before writing code - prefer test-first: write a failing test, then make it pass
-- For multi-step tasks, state the plan with explicit verification at each step
+- For non-trivial changes, present the approach (which files, what strategy) and wait for approval before editing
 
 ## Agents
 - Research agent is the default for any exploration - external docs and internal codebase
@@ -44,4 +44,9 @@
 2. `get_design_context` - implementation details with `data-annotations`
 
 Always use both: metadata for structure, design_context for annotations.
-When implementing from Figma, confirm extracted spacing/color/font values with the user before editing. If Tailwind JIT fails to generate a class, use CSS variables immediately -- do not debug the cache.
+
+### Implementation rules
+- Never assume design values -- present extracted spacing, color, and typography to the user for confirmation before editing
+- Trust the user's screenshot over tool output when they conflict
+- If Tailwind JIT fails to generate a class, use arbitrary values (`gap-[12px]`) or CSS variables immediately
+- After implementing, summarize every design value used so the user can verify at a glance
