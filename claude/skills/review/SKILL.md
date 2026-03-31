@@ -9,8 +9,11 @@ Analyze changes for quality, correctness, and maintainability.
 
 Agent usage:
 
-- For git diff review: Use git-diff-reviewer agent
-- For complex/critical changes: Launch 2-3 general-purpose agents in parallel to review independently, then compare findings to reduce false positives
+- Always launch in parallel for independent full review:
+  - git-diff-reviewer agent (Claude)
+  - codex:codex-rescue agent (Codex/GPT-5.4)
+- For complex/critical changes: Add 1-2 general-purpose agents for additional perspectives
+- After all agents return, deduplicate and elevate issues flagged by multiple reviewers
 
 Focus areas:
 
