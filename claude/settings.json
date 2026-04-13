@@ -1,6 +1,7 @@
 {
   "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_EFFORT_LEVEL": "max"
   },
   "permissions": {
     "allow": [
@@ -32,6 +33,7 @@
       "Read(~/.claude/CLAUDE.md)"
     ]
   },
+  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -76,12 +78,28 @@
     ]
   },
   "enabledPlugins": {
-    "swift-lsp@claude-plugins-official": true,
     "example-skills@anthropic-agent-skills": true,
     "device-control@asleep-internal-skills": true,
     "sleep@asleep-internal-skills": true,
     "sleephub@asleep-internal-skills": true,
-    "frontend-design@claude-plugins-official": true
+    "frontend-design@claude-plugins-official": true,
+    "sleeptrack-skills@sleeptrack-skills": true,
+    "sleeptrack@asleep-internal-skills": true,
+    "codex@openai-codex": true
+  },
+  "extraKnownMarketplaces": {
+    "sleeptrack-skills": {
+      "source": {
+        "source": "github",
+        "repo": "asleep-ai/sleeptrack-skills"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
   },
   "alwaysThinkingEnabled": true
 }

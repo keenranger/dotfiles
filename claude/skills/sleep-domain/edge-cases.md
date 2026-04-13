@@ -16,6 +16,15 @@
 - Interrupted sessions
 - Display interpolated or indicate missing
 
+## Upload Error Handling (SDK 3.2.0+)
+
+### uploadTrackingTerminated / ERR_UPLOAD_TRACKING_TERMINATED (23499)
+- Unified error replacing 6 individual upload 4xx error codes
+- Deprecated codes: uploadBadRequest, uploadUnauthorized, uploadForbidden, uploadNotFound, uploadTooLarge, uploadUnprocessable
+- Common triggers: concurrent tracking on another device (same user_id), session exceeding 24 hours
+- SDK automatically stops recording, releases resources, and closes session -- do NOT call stopTracking() manually
+- uploadFailed and uploadServerError remain unchanged
+
 ## Platform-Specific Issues
 
 ### iOS

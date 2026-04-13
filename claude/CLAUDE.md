@@ -6,6 +6,10 @@
 - Prefer native tool behavior over custom scripts
 - When extending libraries, inherit and override only what's needed
 
+## Scope and Context
+- Cross-cutting changes (field renames, API updates): always check test files, shell scripts, docs, and all consuming code for missed references
+- When scope is ambiguous, confirm the specific target (issue ID, branch, directory) before starting work
+
 ## Code Discipline
 - State assumptions explicitly; when multiple interpretations exist, present options rather than picking silently
 - Push back when a simpler approach exists; self-test: "Would a senior engineer say this is overcomplicated?"

@@ -37,8 +37,18 @@ def validate_yaml(filepath):
     try:
         import yaml
 
+        # Support CloudFormation/SAM custom tags (!Ref, !Sub, !Equals, etc.)
+        loader = yaml.SafeLoader
+        for tag in (
+            "!Ref", "!Sub", "!GetAtt", "!Equals", "!If", "!Not", "!And", "!Or",
+            "!Select", "!Split", "!Join", "!FindInMap", "!ImportValue",
+            "!Condition", "!Transform",
+        ):
+            loader.add_multi_constructor(tag, lambda loader, suffix, node: None)
+            loader.add_constructor(tag, lambda loader, node: None)
+
         with open(filepath, encoding="utf-8") as f:
-            yaml.safe_load(f)
+            yaml.load(f, Loader=loader)
         return True, None
     except ImportError:
         return True, None  # Skip if pyyaml not available
