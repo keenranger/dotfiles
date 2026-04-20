@@ -51,7 +51,6 @@ plugins=(
 git
 tmux
 aws
-golang
 fzf
 zsh-interactive-cd
 zsh-syntax-highlighting
@@ -155,6 +154,8 @@ adb-connect-windows() {
 }
 
 cc() { command claude "$@"; }
+
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 # Added by Antigravity
 export PATH="/Users/mark/.antigravity/antigravity/bin:$PATH"
