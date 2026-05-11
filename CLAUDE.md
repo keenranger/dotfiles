@@ -26,6 +26,7 @@ This is a personal dotfiles repository for managing development environment conf
 - All configs are stored in this repository and symlinked to home directory locations
 - The `create_symlinks()` function handles all symlink creation, removing existing links first to prevent issues
 - Claude configurations are symlinked from `claude/` to `~/.claude/`
+- Codex uses the same instruction source: `claude/CLAUDE.md` is symlinked to `~/.codex/AGENTS.md`
 
 ### Cross-Platform Support
 - The script uses `CHECK_OS=$(uname)` to detect the platform
@@ -47,6 +48,7 @@ The repository includes extensive Claude AI integration:
 - Custom commands in `claude/commands/` for GitHub workflows
 - Hooks in `claude/hooks/` that enforce GPG signing and provide notifications
 - Personal preferences in `claude/CLAUDE.md` specify GPG signing requirements and no emoji preference
+- Codex reads the same personal preferences through `~/.codex/AGENTS.md`
 
 ### The Scaffolding Problem
 Scaffolding refers to predefined paths, rules, or frameworks built around a model to guide it toward accomplishing tasks. As model intelligence increases, scaffolding becomes a constraint that prevents the model from achieving its full potential - it "hobbles" the model.

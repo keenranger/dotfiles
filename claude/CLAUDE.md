@@ -37,11 +37,21 @@
 
 ## TypeScript
 - pnpm (node-linker=hoisted for React Native + NativeWind)
-- Biome for new projects (ESLint + Prettier in existing)
+- oxlint + oxfmt for new projects
 - Strict: noUnusedLocals, noUnusedParameters
+
+## Android
+- App launch on a device: `android run --device=<serial> --apks=<path>` (the `android` CLI from android-cli skill). Do NOT use `adb shell monkey -c LAUNCHER` or `adb shell am start` for launching the app.
+- Gradle invocations need `JAVA_HOME` and `ANDROID_HOME` exported per shell (Bash tool calls don't share env). Either prefix every call (`JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ANDROID_HOME="$HOME/Library/Android/sdk" ./gradlew ...`), or set `org.gradle.java.home=...` in `~/.gradle/gradle.properties` and `sdk.dir=...` in `local.properties`. Prefer the properties-file approach for any project where you'll run gradle more than three times.
+
+## Kotlin
+- `Byte.toInt()` sign-extends. `0x99.toByte().toInt()` is `-103`, and `String.format("%02x", _)` renders it as `ffffff99`. Always mask with `& 0xff` when formatting bytes as hex or feeding them to bit operations: `String.format("%02x", b.toInt() and 0xff)`.
 
 ## Secrets
 - Sentry DSN is safe to expose publicly - it only allows sending events, not reading data
+
+## CI Review Bots
+- `gemini-code-assist[bot]` re-emits its prior review comments on every push; if the same comments re-appear in CI monitor output after a fix push, confirm against the file content before treating them as new findings.
 
 ## Figma MCP
 1. `get_metadata` - XML structure (node IDs, names, positions, sizes)

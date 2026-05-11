@@ -51,6 +51,11 @@ create_symlinks(){
 	ln -sf "$SRCDIR/claude/agents" "$HOME/.claude/agents"
 	ln -sf "$SRCDIR/claude/skills" "$HOME/.claude/skills"
 	ln -sf "$SRCDIR/claude/settings.json" "$HOME/.claude/settings.json"
+
+	# Codex configuration
+	mkdir -p "$HOME/.codex"
+	[ -e "$HOME/.codex/AGENTS.md" ] && rm -f "$HOME/.codex/AGENTS.md"
+	ln -sf "$SRCDIR/claude/CLAUDE.md" "$HOME/.codex/AGENTS.md"
 }
 
 set_zsh(){
@@ -249,4 +254,3 @@ else
 	shift
 	$func "$@"
 fi
-
