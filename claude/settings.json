@@ -30,8 +30,22 @@
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:github.com)",
       "Read(~/.claude/settings.json)",
-      "Read(~/.claude/CLAUDE.md)"
-    ]
+      "Read(~/.claude/CLAUDE.md)",
+      "mcp__claude_ai_Sentry__search_issues",
+      "mcp__claude_ai_Sentry__search_events",
+      "mcp__claude_ai_Sentry__get_sentry_resource",
+      "mcp__claude_ai_Sentry__find_organizations",
+      "mcp__claude_ai_Sentry__find_projects",
+      "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__revenuecat__list-projects",
+      "mcp__revenuecat__list-offerings",
+      "mcp__revenuecat__list-products",
+      "mcp__revenuecat__list-apps",
+      "mcp__revenuecat__list-entitlements",
+      "mcp__revenuecat__list-packages"
+    ],
+    "defaultMode": "auto"
   },
   "model": "opus[1m]",
   "hooks": {
@@ -85,9 +99,19 @@
     "frontend-design@claude-plugins-official": true,
     "sleeptrack-skills@sleeptrack-skills": true,
     "sleeptrack@asleep-internal-skills": true,
-    "codex@openai-codex": true
+    "codex@openai-codex": true,
+    "swift-lsp@claude-plugins-official": true,
+    "kotlin-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
+    "asleep-internal-skills": {
+      "source": {
+        "source": "github",
+        "repo": "asleep-ai/internal-skills"
+      }
+    },
     "sleeptrack-skills": {
       "source": {
         "source": "github",
@@ -101,5 +125,10 @@
       }
     }
   },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": true,
+  "editorMode": "vim",
+  "teammateMode": "auto",
+  "remoteControlAtStartup": true,
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
 }
