@@ -89,9 +89,6 @@ Scaffolding refers to predefined paths, rules, or frameworks built around a mode
 - Docker commands are aliased to Podman for compatibility
 - Podman socket provides Docker API compatibility
 
-## Important Notes from Personal Preferences
+## Personal Preferences
 
-From `claude/CLAUDE.md`:
-- Always sign commits with GPG (`git commit -S`)
-- No emojis in commits or code
-- Prefer 'Replace ~' over 'Refactor: Replace ~' in commit messages
+Cross-project rules (GPG signing, commit style, language tooling, etc.) live in `claude/CLAUDE.md`, which is symlinked to both `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`. Edit there, not here.

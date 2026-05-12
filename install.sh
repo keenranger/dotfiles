@@ -53,9 +53,11 @@ create_symlinks(){
 	ln -sf "$SRCDIR/claude/settings.json" "$HOME/.claude/settings.json"
 
 	# Codex configuration
-	mkdir -p "$HOME/.codex"
+	mkdir -p "$HOME/.codex/skills"
 	[ -e "$HOME/.codex/AGENTS.md" ] && rm -f "$HOME/.codex/AGENTS.md"
 	ln -sf "$SRCDIR/claude/CLAUDE.md" "$HOME/.codex/AGENTS.md"
+	[ -e "$HOME/.codex/skills/android-cli" ] && rm -rf "$HOME/.codex/skills/android-cli"
+	ln -sf "$SRCDIR/claude/skills/android-cli" "$HOME/.codex/skills/android-cli"
 }
 
 set_zsh(){
