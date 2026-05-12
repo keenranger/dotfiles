@@ -25,6 +25,7 @@ Focus areas:
 - Automation: Repetitive patterns that could become skills/commands/agents
 - Follow-ups: Incomplete work, TODO markers, next session priorities
 - Retrospective: User guidance patterns that could be improved
+- Scaffolding cleanup: After exploration sessions, identify experiments whose purpose has resolved -- probe UIs, debug bridges, broadcast receivers, ad-hoc forward-synthesis helpers, intermediate analysis docs. Verify the final diff contains only what serves the stated request; flag scaffolding for removal in a follow-up commit before sending to reviewers.
 
 Duplicate check:
 

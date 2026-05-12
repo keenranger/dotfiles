@@ -84,6 +84,19 @@ Example: properties=30 (0x1E) = Read + WriteNR + Write + Notify -> has CCCD
 3. Find anchor points: read a handle in snoop, decode hex value, match to known data (e.g., device name, model string)
 4. Count forward/backward from anchors to identify unknown handles
 
+## Reverse Engineering Encoding Schemes
+
+When decoding a proprietary write format, check first whether the device echoes its rendered state on a notify-capable characteristic — typically a standard SIG characteristic alongside the proprietary one. That echo is the highest-fidelity ground truth available, and beats hand-built probe matrices that compound errors and walk through several wrong models (RGB direct → HSV → barycentric → bbox → ...) before converging.
+
+Workflow:
+
+1. Subscribe to the standard / state notify characteristic (CCCD = 0x0001) before issuing any probe writes.
+2. Drive a calibration sweep with ADB-triggered writes (see `android-cli` skill for `adb shell am broadcast` + custom `BroadcastReceiver` pattern).
+3. For each input, capture the notified output. Linear-fit each axis with R²; perfect fit (R² > 0.99) confirms the model.
+4. Single-byte probes only show edge-of-gamut behaviour — they do not generalise to interior points. Always validate the encoding model against multi-byte real captures, not just probes.
+
+If the device tells you what it rendered, listen first.
+
 ## SMP Pairing Debugging
 
 ### Common Failure Codes
