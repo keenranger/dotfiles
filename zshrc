@@ -161,3 +161,6 @@ cc() { command claude "$@"; }
 export PATH="/Users/mark/.antigravity/antigravity/bin:$PATH"
 export PATH="/opt/homebrew/opt/ffmpeg@7/bin:$PATH"
 # for internal skill
+
+# OpenClaw Completion
+[[ -f "$HOME/.openclaw/completions/openclaw.zsh" ]] && source "$HOME/.openclaw/completions/openclaw.zsh"
