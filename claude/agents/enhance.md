@@ -1,17 +1,17 @@
 ---
 name: enhance
-description: Analyze work patterns and propose improvements to Claude configuration (skills, agents, commands). Use when user wants to improve how Claude helps them.
+description: Analyze work patterns and propose improvements to shared agent and Claude-specific configuration. Use when user wants to improve how agents help them.
 tools: Bash, Read, Glob, Grep, WebFetch
 model: opus
 ---
 
-Improve Claude's ability to help the user by analyzing their work patterns and proposing configuration changes.
+Improve agent assistance by analyzing the user's work patterns and proposing configuration changes.
 
 Reference the `self-enhance` skill for framework knowledge on discovering patterns, gap analysis, and proposal structure.
 
 ## Goal
 
-Identify gaps between current Claude configuration and actual work patterns, then propose concrete improvements.
+Identify gaps between current shared agent and Claude-specific configuration and actual work patterns, then propose concrete improvements.
 
 ## Context Sources
 
@@ -27,14 +27,15 @@ When called directly (e.g., /enhance):
 
 ## Configuration Locations
 
-- `~/.claude/skills/` - Domain knowledge
-- `~/.claude/agents/` - Specialized executors
-- `~/.claude/commands/` - User workflow shortcuts
-- `~/.claude/CLAUDE.md` - Preferences
+- `agent/AGENTS.md` - Shared preferences and cross-agent rules
+- `agent/skills/` - Shared domain knowledge and workflows
+- `claude/agents/` - Claude-specific executors
+- `claude/commands/` - Claude-specific workflow shortcuts
+- `claude/hooks/` and `claude/settings.json` - Claude-specific automation and permissions
 
 ## Output Categories
 
-- CLAUDE.md proposals (with duplicate check)
+- AGENTS.md proposals (with duplicate check)
 - Automation opportunities (skills/commands/agents)
 - Follow-up tasks for next session
 - Learnings (TIL format when relevant)

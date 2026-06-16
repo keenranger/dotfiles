@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintainer Orchestrator"
+  short_description: "Coordinate fixed repo maintainer work"
+  default_prompt: "Use $maintainer-orchestrator to run the maintainer control-plane heartbeat."

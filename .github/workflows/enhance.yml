@@ -19,10 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Claude config
+      - name: Setup agent config
         run: |
           mkdir -p ~/.claude
-          for item in CLAUDE.md commands hooks agents skills settings.json; do
+          ln -sf "$PWD/agent/AGENTS.md" ~/.claude/CLAUDE.md
+          ln -sf "$PWD/agent/AGENTS.md" ~/.claude/AGENTS.md
+          ln -sf "$PWD/agent/skills" ~/.claude/skills
+          for item in commands hooks agents settings.json; do
             [ -e "claude/$item" ] && ln -sf "$PWD/claude/$item" ~/.claude/
           done
           ls -la ~/.claude/
@@ -33,10 +36,10 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Improve this dotfiles repository's Claude configuration.
+            Improve this dotfiles repository's shared agent configuration.
 
             Process:
-            1. Review claude/ config (skills, agents, commands, CLAUDE.md)
+            1. Review agent/ shared config (AGENTS.md, skills) and claude/ tool-specific config (agents, commands, hooks, settings)
             2. Analyze my GitHub activity (gh search issues/prs --author=keenranger, gh repo list, sort by date desc)
             3. Identify gaps between config and actual work
 

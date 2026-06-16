@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-SRCDIR=$(pwd)
+SRCDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 CHECK_OS=$(uname)
 
 ensure_homebrew(){
@@ -16,8 +16,73 @@ ensure_homebrew(){
 	fi
 }
 
-create_symlinks(){
-	echo "creating symlinks"
+replace_symlink(){
+	local src=$1
+	local dst=$2
+
+	if [ -L "$dst" ] || [ -e "$dst" ]; then
+		rm -rf "$dst"
+	fi
+	ln -s "$src" "$dst"
+}
+
+replace_symlink_if_source_exists(){
+	local src=$1
+	local dst=$2
+
+	if [ -e "$src" ] || [ -L "$src" ]; then
+		replace_symlink "$src" "$dst"
+	elif [ -L "$dst" ]; then
+		rm -f "$dst"
+	fi
+}
+
+is_managed_skill_symlink(){
+	local dst=$1
+	local target
+	target=$(readlink "$dst")
+
+	case "$target" in
+		"$SRCDIR/agent/skills"/*|"$SRCDIR/claude/skills"/*)
+			return 0
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+link_agent_skills(){
+	local dst_dir=$1
+
+	mkdir -p "$dst_dir"
+	for src in "$SRCDIR"/agent/skills/*; do
+		[ -e "$src" ] || [ -L "$src" ] || continue
+		local name
+		name=$(basename "$src")
+		local rel="${src#$SRCDIR/}"
+		if command -v git >/dev/null 2>&1 &&
+			git -C "$SRCDIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 &&
+			git -C "$SRCDIR" check-ignore -q "$rel"; then
+			continue
+		fi
+		local dst="$dst_dir/$name"
+
+		if [ ! -e "$dst" ] && [ ! -L "$dst" ]; then
+			replace_symlink "$src" "$dst"
+		elif [ -L "$dst" ] && is_managed_skill_symlink "$dst"; then
+			replace_symlink "$src" "$dst"
+		elif [ -L "$dst" ]; then
+			echo "Skipping existing non-managed skill symlink: $dst"
+		elif [ -d "$dst" ] && diff -qr "$src" "$dst" >/dev/null 2>&1; then
+			replace_symlink "$src" "$dst"
+		else
+			echo "Skipping existing non-symlink skill: $dst"
+		fi
+	done
+}
+
+create_shell_symlinks(){
 	ln -sf "$SRCDIR/vimrc" "$HOME/.vimrc"
 	ln -sf "$SRCDIR/tmux.conf" "$HOME/.tmux.conf"
 	ln -sf "$SRCDIR/zshrc" "$HOME/.zshrc"
@@ -35,29 +100,30 @@ create_symlinks(){
 		ln -sf "$SRCDIR/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
 		ln -sf "$SRCDIR/gnupg/common.conf" "$HOME/.gnupg/common.conf"
 	fi
-	# Claude configuration
-	mkdir -p "$HOME/.claude"
-	# Remove existing symlinks only if they exist
-	[ -e "$HOME/.claude/CLAUDE.md" ] && rm -f "$HOME/.claude/CLAUDE.md"
-	[ -e "$HOME/.claude/commands" ] && rm -rf "$HOME/.claude/commands"
-	[ -e "$HOME/.claude/hooks" ] && rm -rf "$HOME/.claude/hooks"
-	[ -e "$HOME/.claude/agents" ] && rm -rf "$HOME/.claude/agents"
-	[ -e "$HOME/.claude/skills" ] && rm -rf "$HOME/.claude/skills"
-	[ -e "$HOME/.claude/settings.json" ] && rm -f "$HOME/.claude/settings.json"
-	# Create symlinks for all Claude files
-	ln -sf "$SRCDIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-	ln -sf "$SRCDIR/claude/commands" "$HOME/.claude/commands"
-	ln -sf "$SRCDIR/claude/hooks" "$HOME/.claude/hooks"
-	ln -sf "$SRCDIR/claude/agents" "$HOME/.claude/agents"
-	ln -sf "$SRCDIR/claude/skills" "$HOME/.claude/skills"
-	ln -sf "$SRCDIR/claude/settings.json" "$HOME/.claude/settings.json"
+}
 
-	# Codex configuration
+create_claude_symlinks(){
+	mkdir -p "$HOME/.claude"
+	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.claude/CLAUDE.md"
+	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.claude/AGENTS.md"
+	replace_symlink "$SRCDIR/agent/skills" "$HOME/.claude/skills"
+	replace_symlink_if_source_exists "$SRCDIR/claude/commands" "$HOME/.claude/commands"
+	replace_symlink_if_source_exists "$SRCDIR/claude/hooks" "$HOME/.claude/hooks"
+	replace_symlink_if_source_exists "$SRCDIR/claude/agents" "$HOME/.claude/agents"
+	replace_symlink_if_source_exists "$SRCDIR/claude/settings.json" "$HOME/.claude/settings.json"
+}
+
+create_codex_symlinks(){
 	mkdir -p "$HOME/.codex/skills"
-	[ -e "$HOME/.codex/AGENTS.md" ] && rm -f "$HOME/.codex/AGENTS.md"
-	ln -sf "$SRCDIR/claude/CLAUDE.md" "$HOME/.codex/AGENTS.md"
-	[ -e "$HOME/.codex/skills/android-cli" ] && rm -rf "$HOME/.codex/skills/android-cli"
-	ln -sf "$SRCDIR/claude/skills/android-cli" "$HOME/.codex/skills/android-cli"
+	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.codex/AGENTS.md"
+	link_agent_skills "$HOME/.codex/skills"
+}
+
+create_symlinks(){
+	echo "creating symlinks"
+	create_shell_symlinks
+	create_claude_symlinks
+	create_codex_symlinks
 }
 
 set_zsh(){

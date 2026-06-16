@@ -1,3 +1,6 @@
 .DS_Store
 private.key
 __pycache__/
+agent/skills/android-cli
+agent/skills/sentry-cli
+agent/skills/tossinvest-openapi
