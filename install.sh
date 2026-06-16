@@ -178,7 +178,7 @@ set_zsh(){
 
 set_mac(){
 	ensure_homebrew
-	brew install --cask ghostty rectangle karabiner-elements tailscale
+	brew install --cask google-chrome codex-app ghostty rectangle karabiner-elements tailscale grandperspective rustdesk
 	brew install terminal-notifier
 	set_keyboard
 }
