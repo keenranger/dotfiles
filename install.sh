@@ -4,6 +4,74 @@ set -euo pipefail
 SRCDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 CHECK_OS=$(uname)
 
+COMMON_BREW_PACKAGES=(
+	zsh
+	fzf
+	ripgrep
+	bat
+	gh
+	neovim
+	tmux
+	gnupg
+	fnm
+	pnpm
+)
+
+LINUX_BASE_APT_PACKAGES=(
+	build-essential
+	curl
+)
+
+DARWIN_BREW_PACKAGES=(
+	pinentry-mac
+	lazygit
+)
+
+DARWIN_FONT_CASKS=(
+	font-meslo-lg-nerd-font
+	font-d2coding-nerd-font
+)
+
+DARWIN_APP_CASKS=(
+	google-chrome
+	codex-app
+	ghostty
+	rectangle
+	karabiner-elements
+	tailscale
+	grandperspective
+	rustdesk
+)
+
+DARWIN_CODEX_MACHINE_CASKS=(
+	google-chrome
+	codex-app
+	ghostty
+	rectangle
+	grandperspective
+	rustdesk
+)
+
+CLOUD_BREW_PACKAGES=(
+	awscli
+	opentofu
+)
+
+DARWIN_CONTAINER_BREW_PACKAGES=(
+	podman
+	podman-compose
+)
+
+brew_install(){
+	[ "$#" -eq 0 ] && return 0
+	brew install "$@"
+}
+
+brew_install_casks(){
+	[ "$#" -eq 0 ] && return 0
+	brew install --cask "$@"
+}
+
 ensure_homebrew(){
 	if ! command -v brew &> /dev/null; then
 		echo "Installing Homebrew..."
@@ -60,7 +128,7 @@ link_agent_skills(){
 		[ -e "$src" ] || [ -L "$src" ] || continue
 		local name
 		name=$(basename "$src")
-		local rel="${src#$SRCDIR/}"
+		local rel="${src#"$SRCDIR"/}"
 		if command -v git >/dev/null 2>&1 &&
 			git -C "$SRCDIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 &&
 			git -C "$SRCDIR" check-ignore -q "$rel"; then
@@ -131,13 +199,13 @@ set_zsh(){
 
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		# macOS installation
-		brew install zsh fzf ripgrep bat gh neovim tmux gnupg pinentry-mac fnm pnpm lazygit
-		brew install --cask font-meslo-lg-nerd-font font-d2coding-nerd-font
+		brew_install "${COMMON_BREW_PACKAGES[@]}" "${DARWIN_BREW_PACKAGES[@]}"
+		brew_install_casks "${DARWIN_FONT_CASKS[@]}"
 	else
 		# Linux installation
 		sudo apt update
-		sudo apt install -y build-essential curl
-		brew install zsh fzf ripgrep bat gh neovim tmux gnupg fnm pnpm
+		sudo apt install -y "${LINUX_BASE_APT_PACKAGES[@]}"
+		brew_install "${COMMON_BREW_PACKAGES[@]}"
 	fi
 
 	# Setup fnm with Node LTS
@@ -178,9 +246,19 @@ set_zsh(){
 
 set_mac(){
 	ensure_homebrew
-	brew install --cask google-chrome codex-app ghostty rectangle karabiner-elements tailscale grandperspective rustdesk
-	brew install terminal-notifier
+	brew_install_casks "${DARWIN_APP_CASKS[@]}"
+	brew_install terminal-notifier
 	set_keyboard
+}
+
+set_codex_machine(){
+	set_zsh
+	create_symlinks
+	set_claude
+	if [[ "$CHECK_OS" = "Darwin" ]]; then
+		brew_install_casks "${DARWIN_CODEX_MACHINE_CASKS[@]}"
+		brew_install terminal-notifier
+	fi
 }
 
 set_keyboard(){
@@ -216,7 +294,7 @@ set_cloud(){
 	ensure_homebrew
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		# macOS installation
-		brew install awscli opentofu
+		brew_install "${CLOUD_BREW_PACKAGES[@]}"
 	else
 		# Linux installation
 		# AWS CLI
@@ -295,7 +373,7 @@ container(){
 	ensure_homebrew
 	if [[ "$(uname)" = "Darwin" ]]; then
 		# macOS installation
-		brew install podman podman-compose
+		brew_install "${DARWIN_CONTAINER_BREW_PACKAGES[@]}"
 		podman machine init
 		podman machine start
 	else
@@ -309,7 +387,31 @@ container(){
 	fi
 }
 
-if [ $# = 0 ]; then
+usage(){
+	cat <<'EOF'
+Usage:
+  ./install.sh                    Run the personal default profile
+  ./install.sh codex_machine      Run the company Codex machine profile
+  ./install.sh <command> [args]   Run one setup command
+
+Commands:
+  create_symlinks
+  create_shell_symlinks
+  create_claude_symlinks
+  create_codex_symlinks
+  set_zsh
+  set_mac
+  set_keyboard
+  set_cloud
+  set_claude
+  set_git
+  set_gpg [export|import FILE]
+  set_codex_machine
+  container
+EOF
+}
+
+default_install(){
 	set_zsh
 	set_git
 	create_symlinks
@@ -317,8 +419,35 @@ if [ $# = 0 ]; then
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		set_mac
 	fi
-else
-	func=$1
+}
+
+main(){
+	if [ $# = 0 ]; then
+		default_install
+		return
+	fi
+
+	local command=$1
 	shift
-	$func "$@"
-fi
+	case "$command" in
+		default|install)
+			default_install "$@"
+			;;
+		codex_machine|set_codex_machine)
+			set_codex_machine "$@"
+			;;
+		create_symlinks|create_shell_symlinks|create_claude_symlinks|create_codex_symlinks|set_zsh|set_mac|set_keyboard|set_cloud|set_claude|set_git|set_gpg|container)
+			"$command" "$@"
+			;;
+		help|-h|--help)
+			usage
+			;;
+		*)
+			echo "Unknown command: $command" >&2
+			usage >&2
+			return 1
+			;;
+	esac
+}
+
+main "$@"
