@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Project Triage"
+  short_description: "Prioritize GitHub issues and PRs"
+  default_prompt: "Use $github-project-triage to map a GitHub repo queue into next actions."
