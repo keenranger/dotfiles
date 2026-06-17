@@ -75,6 +75,10 @@ brew_install_casks(){
 ensure_homebrew(){
 	if ! command -v brew &> /dev/null; then
 		echo "Installing Homebrew..."
+		if [[ "$CHECK_OS" = "Darwin" ]]; then
+			echo "Requesting sudo access for Homebrew install..."
+			sudo -v
+		fi
 		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 		if [[ "$CHECK_OS" = "Darwin" ]]; then
 			eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"
@@ -239,9 +243,12 @@ set_zsh(){
 		https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
 	# Configure brew autoupdate for daily automatic updates
-	brew tap homebrew/autoupdate
-	brew autoupdate delete 2>/dev/null || true
-	brew autoupdate start 86400 --upgrade --cleanup
+	if [[ "$CHECK_OS" = "Darwin" ]]; then
+		brew tap domt4/autoupdate
+		brew trust domt4/autoupdate 2>/dev/null || true
+		brew autoupdate delete 2>/dev/null || true
+		brew autoupdate start 86400 --upgrade --cleanup --sudo
+	fi
 }
 
 set_mac(){
