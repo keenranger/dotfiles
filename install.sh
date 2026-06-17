@@ -177,6 +177,12 @@ link_codex_pets(){
 		[ -e "$src" ] || [ -L "$src" ] || continue
 		local name
 		name=$(basename "$src")
+		local rel="${src#"$SRCDIR"/}"
+		if command -v git >/dev/null 2>&1 &&
+			git -C "$SRCDIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 &&
+			git -C "$SRCDIR" check-ignore -q "$rel"; then
+			continue
+		fi
 		local dst="$dst_dir/$name"
 
 		if [ ! -e "$dst" ] && [ ! -L "$dst" ]; then
