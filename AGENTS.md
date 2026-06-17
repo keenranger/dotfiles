@@ -16,6 +16,7 @@ Shared agent rules and reusable workflow skills live under `agent/`:
 Tool-specific configuration stays under the tool directory:
 
 - `claude/settings.json`, `claude/hooks/`, and `claude/agents/` are Claude Code-specific.
+- `codex/pets/` contains managed Codex pet packages that are safe to restore on new machines.
 - Codex auth, sessions, caches, logs, memories, generated images, connector state, and runtime-installed skills are not dotfiles material and must not be copied into this repository.
 
 ## Installation Commands
@@ -63,6 +64,14 @@ Claude Code can use the shared skill directory directly:
 ```
 
 Codex keeps its own `~/.codex/skills` directory because Codex may install runtime or connector skills there. The installer links each managed shared skill individually and skips existing non-managed symlink or non-symlink skills unless their contents already match the repository copy.
+
+Managed Codex pets are linked individually:
+
+```text
+~/.codex/pets/<pet-id> -> dotfiles/codex/pets/<pet-id>
+```
+
+Generated pet run folders such as `~/.codex/pet-runs/` remain local artifacts and are not copied into this repository.
 
 ## Development Guidelines
 
