@@ -15,6 +15,9 @@ Personal dotfiles and shared agent configuration for local development machines.
 # Full personal-machine setup
 ./install.sh
 
+# Company Codex machine setup without personal global Git identity
+./install.sh codex_machine
+
 # Refresh all symlinks
 ./install.sh create_symlinks
 
