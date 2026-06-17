@@ -244,9 +244,10 @@ set_zsh(){
 
 	# Configure brew autoupdate for daily automatic updates
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
+		mkdir -p "$HOME/Library/LaunchAgents"
 		brew tap domt4/autoupdate
 		brew trust domt4/autoupdate 2>/dev/null || true
-		brew autoupdate delete 2>/dev/null || true
+		brew autoupdate delete >/dev/null 2>&1 || true
 		brew autoupdate start 86400 --upgrade --cleanup --sudo
 	fi
 }
