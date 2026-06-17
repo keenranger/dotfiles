@@ -1,0 +1,6 @@
+{
+  "id": "avocado",
+  "displayName": "Avocado",
+  "description": "A tiny avocado-themed AI companion adapted from the current Sui Drop pet style.",
+  "spritesheetPath": "spritesheet.webp"
+}

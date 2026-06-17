@@ -21,6 +21,7 @@
 - For vague tasks, define verifiable success criteria before writing code - prefer test-first: write a failing test, then make it pass
 - For non-trivial changes, present the approach (which files, what strategy) and wait for approval before editing
 - If the user corrects the same kind of misinterpretation twice in one session, stop, name the pattern, and propose a permanent fix (AGENTS.md rule, memory entry, or skill update) before continuing. The moment of the second correction is when the pattern is most visible -- don't defer this to /wrap or a retrospective pass
+- For generated images, pets, videos, or other visual artifacts, never state or imply the artifact exists until a generation/edit tool has returned a real result or a saved file has been verified. If the user asks to see an image, show the artifact or provide the verified path before describing it. If generation fails or returns no usable file, say that plainly and do not substitute a description for the missing output.
 
 ## Investigation Discipline
 - Before claiming a symbol/function/file doesn't exist, search beyond the working tree: `git log --all -S '<name>' --source --remotes` and `git grep '<name>' $(git rev-list --remotes | head -200)`. `git grep` and Grep alone miss unmerged branches
