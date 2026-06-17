@@ -126,12 +126,16 @@ is_managed_skill_symlink(){
 
 is_managed_codex_pet_symlink(){
 	local dst=$1
+	local name=${2:-}
 	local target
 	target=$(readlink "$dst")
 
 	case "$target" in
 		"$SRCDIR/codex/pets"/*)
 			return 0
+			;;
+		*/codex/pets/*)
+			[ -n "$name" ] && [ "$(basename "$target")" = "$name" ]
 			;;
 		*)
 			return 1
@@ -187,7 +191,7 @@ link_codex_pets(){
 
 		if [ ! -e "$dst" ] && [ ! -L "$dst" ]; then
 			replace_symlink "$src" "$dst"
-		elif [ -L "$dst" ] && is_managed_codex_pet_symlink "$dst"; then
+		elif [ -L "$dst" ] && is_managed_codex_pet_symlink "$dst" "$name"; then
 			replace_symlink "$src" "$dst"
 		elif [ -L "$dst" ]; then
 			echo "Skipping existing non-managed Codex pet symlink: $dst"
