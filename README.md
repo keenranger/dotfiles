@@ -6,6 +6,7 @@ Personal dotfiles and shared agent configuration for local development machines.
 
 - `agent/AGENTS.md`: shared instructions for Codex, Claude Code, and similar coding agents.
 - `agent/skills/`: shared workflow skills.
+- `codex/pets/`: managed Codex pet packages.
 - `claude/`: Claude Code-specific settings, hooks, and agents.
 - `install.sh`: modular setup and symlink installer.
 
@@ -28,4 +29,4 @@ Personal dotfiles and shared agent configuration for local development machines.
 ./install.sh create_claude_symlinks
 ```
 
-`create_codex_symlinks` links managed shared skills individually into `~/.codex/skills` so Codex-installed runtime skills and non-managed symlinks remain in place.
+`create_codex_symlinks` links managed shared skills individually into `~/.codex/skills` and managed pets into `~/.codex/pets` so Codex-installed runtime skills and non-managed symlinks remain in place.

@@ -124,6 +124,21 @@ is_managed_skill_symlink(){
 	esac
 }
 
+is_managed_codex_pet_symlink(){
+	local dst=$1
+	local target
+	target=$(readlink "$dst")
+
+	case "$target" in
+		"$SRCDIR/codex/pets"/*)
+			return 0
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
 link_agent_skills(){
 	local dst_dir=$1
 
@@ -150,6 +165,30 @@ link_agent_skills(){
 			replace_symlink "$src" "$dst"
 		else
 			echo "Skipping existing non-symlink skill: $dst"
+		fi
+	done
+}
+
+link_codex_pets(){
+	local dst_dir=$1
+
+	mkdir -p "$dst_dir"
+	for src in "$SRCDIR"/codex/pets/*; do
+		[ -e "$src" ] || [ -L "$src" ] || continue
+		local name
+		name=$(basename "$src")
+		local dst="$dst_dir/$name"
+
+		if [ ! -e "$dst" ] && [ ! -L "$dst" ]; then
+			replace_symlink "$src" "$dst"
+		elif [ -L "$dst" ] && is_managed_codex_pet_symlink "$dst"; then
+			replace_symlink "$src" "$dst"
+		elif [ -L "$dst" ]; then
+			echo "Skipping existing non-managed Codex pet symlink: $dst"
+		elif [ -d "$dst" ] && diff -qr "$src" "$dst" >/dev/null 2>&1; then
+			replace_symlink "$src" "$dst"
+		else
+			echo "Skipping existing non-symlink Codex pet: $dst"
 		fi
 	done
 }
@@ -186,9 +225,10 @@ create_claude_symlinks(){
 }
 
 create_codex_symlinks(){
-	mkdir -p "$HOME/.codex/skills"
+	mkdir -p "$HOME/.codex/skills" "$HOME/.codex/pets"
 	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.codex/AGENTS.md"
 	link_agent_skills "$HOME/.codex/skills"
+	link_codex_pets "$HOME/.codex/pets"
 }
 
 create_symlinks(){
