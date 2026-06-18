@@ -1,6 +1,6 @@
 {
-  "id": "avocado",
-  "displayName": "Avocado",
+  "id": "sui-avocado",
+  "displayName": "Sui Avocado",
   "description": "A Sui Drop-like avocado Codex pet with watery blue hair, avocado peel costume, and pit motif.",
   "spritesheetPath": "spritesheet.webp"
 }
