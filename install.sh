@@ -143,6 +143,33 @@ is_managed_codex_pet_symlink(){
 	esac
 }
 
+managed_codex_pet_marker(){
+	local name=$1
+	printf "%s/.codex/.dotfiles-managed-pets/%s\n" "$HOME" "$name"
+}
+
+is_marked_managed_codex_pet(){
+	local name=$1
+	local marker
+	marker=$(managed_codex_pet_marker "$name")
+
+	[ -f "$marker" ] && [ "$(cat "$marker")" = "codex/pets/$name" ]
+}
+
+copy_codex_pet(){
+	local src=$1
+	local dst=$2
+	local name
+	local marker
+	name=$(basename "$src")
+	marker=$(managed_codex_pet_marker "$name")
+
+	rm -rf "$dst"
+	mkdir -p "$(dirname "$dst")" "$(dirname "$marker")"
+	cp -R "$src" "$dst"
+	printf "codex/pets/%s\n" "$name" > "$marker"
+}
+
 link_agent_skills(){
 	local dst_dir=$1
 
@@ -173,10 +200,37 @@ link_agent_skills(){
 	done
 }
 
-link_codex_pets(){
+prune_stale_codex_pets(){
+	local dst_dir=$1
+	local marker_dir="$HOME/.codex/.dotfiles-managed-pets"
+
+	if [ -d "$marker_dir" ]; then
+		for marker in "$marker_dir"/*; do
+			[ -e "$marker" ] || continue
+			local name
+			name=$(basename "$marker")
+			if [ ! -e "$SRCDIR/codex/pets/$name" ] && is_marked_managed_codex_pet "$name"; then
+				rm -rf "$dst_dir/$name"
+				rm -f "$marker"
+			fi
+		done
+	fi
+
+	for dst in "$dst_dir"/*; do
+		[ -L "$dst" ] || continue
+		local name
+		name=$(basename "$dst")
+		if [ ! -e "$SRCDIR/codex/pets/$name" ] && is_managed_codex_pet_symlink "$dst" "$name"; then
+			rm -f "$dst"
+		fi
+	done
+}
+
+install_codex_pets(){
 	local dst_dir=$1
 
 	mkdir -p "$dst_dir"
+	prune_stale_codex_pets "$dst_dir"
 	for src in "$SRCDIR"/codex/pets/*; do
 		[ -e "$src" ] || [ -L "$src" ] || continue
 		local name
@@ -190,13 +244,15 @@ link_codex_pets(){
 		local dst="$dst_dir/$name"
 
 		if [ ! -e "$dst" ] && [ ! -L "$dst" ]; then
-			replace_symlink "$src" "$dst"
+			copy_codex_pet "$src" "$dst"
 		elif [ -L "$dst" ] && is_managed_codex_pet_symlink "$dst" "$name"; then
-			replace_symlink "$src" "$dst"
+			copy_codex_pet "$src" "$dst"
 		elif [ -L "$dst" ]; then
 			echo "Skipping existing non-managed Codex pet symlink: $dst"
+		elif [ -d "$dst" ] && is_marked_managed_codex_pet "$name"; then
+			copy_codex_pet "$src" "$dst"
 		elif [ -d "$dst" ] && diff -qr "$src" "$dst" >/dev/null 2>&1; then
-			replace_symlink "$src" "$dst"
+			copy_codex_pet "$src" "$dst"
 		else
 			echo "Skipping existing non-symlink Codex pet: $dst"
 		fi
@@ -238,7 +294,7 @@ create_codex_symlinks(){
 	mkdir -p "$HOME/.codex/skills" "$HOME/.codex/pets"
 	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.codex/AGENTS.md"
 	link_agent_skills "$HOME/.codex/skills"
-	link_codex_pets "$HOME/.codex/pets"
+	install_codex_pets "$HOME/.codex/pets"
 }
 
 create_symlinks(){
