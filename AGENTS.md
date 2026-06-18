@@ -4,7 +4,7 @@ This file provides guidance to coding agents when working in this dotfiles repos
 
 ## Repository Overview
 
-This is a personal dotfiles repository for managing development environment configuration across macOS and Linux systems. Configurations are stored in the repository and deployed to home-directory locations with symlinks.
+This is a personal dotfiles repository for managing development environment configuration across macOS and Linux systems. Configurations are stored in the repository and deployed to home-directory locations with symlinks or managed copies where the consuming tool requires real files.
 
 ## Shared Agent Configuration
 
@@ -25,13 +25,13 @@ Tool-specific configuration stays under the tool directory:
 # Full personal-machine installation
 ./install.sh
 
-# Only update symlinks
+# Only update symlinks and managed Codex pet copies
 ./install.sh create_symlinks
 
 # Only update Claude Code symlinks
 ./install.sh create_claude_symlinks
 
-# Only update Codex symlinks
+# Only update Codex symlinks and managed pet copies
 ./install.sh create_codex_symlinks
 
 # Install shell/tooling support
@@ -47,7 +47,7 @@ Tool-specific configuration stays under the tool directory:
 ./install.sh container
 ```
 
-## Symlink Strategy
+## Install Strategy
 
 Claude and Codex share the same canonical instruction file:
 
@@ -65,11 +65,14 @@ Claude Code can use the shared skill directory directly:
 
 Codex keeps its own `~/.codex/skills` directory because Codex may install runtime or connector skills there. The installer links each managed shared skill individually and skips existing non-managed symlink or non-symlink skills unless their contents already match the repository copy.
 
-Managed Codex pets are linked individually:
+Managed Codex pets are copied individually because Codex expects real pet package directories:
 
 ```text
-~/.codex/pets/<pet-id> -> dotfiles/codex/pets/<pet-id>
+~/.codex/pets/<pet-id>/pet.json
+~/.codex/pets/<pet-id>/spritesheet.webp
 ```
+
+The installer marks copied pets under `~/.codex/.dotfiles-managed-pets/` so later runs can update managed copies and remove stale managed copies after repository renames. Existing non-managed pet directories are skipped.
 
 Generated pet run folders such as `~/.codex/pet-runs/` remain local artifacts and are not copied into this repository.
 
