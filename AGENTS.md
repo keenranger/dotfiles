@@ -12,10 +12,12 @@ Shared agent rules and reusable workflow skills live under `agent/`:
 
 - `agent/AGENTS.md`: canonical shared instructions for Codex, Claude Code, and similar coding agents.
 - `agent/skills/`: shared skills that may be exposed to both `~/.codex/skills` and `~/.claude/skills`.
+- `agent/hooks/`: shared hook scripts used by both Codex and Claude Code.
 
 Tool-specific configuration stays under the tool directory:
 
 - `claude/settings.json`, `claude/hooks/`, and `claude/agents/` are Claude Code-specific.
+- `codex/hooks.json` is Codex-specific hook configuration installed to `~/.codex/hooks.json`.
 - `codex/pets/` contains managed Codex pet packages that are safe to restore on new machines.
 - Codex auth, sessions, caches, logs, memories, generated images, connector state, and runtime-installed skills are not dotfiles material and must not be copied into this repository.
 
@@ -25,13 +27,13 @@ Tool-specific configuration stays under the tool directory:
 # Full personal-machine installation
 ./install.sh
 
-# Only update symlinks and managed Codex pet copies
+# Only update symlinks and managed Codex pet/hook copies
 ./install.sh create_symlinks
 
 # Only update Claude Code symlinks
 ./install.sh create_claude_symlinks
 
-# Only update Codex symlinks and managed pet copies
+# Only update Codex symlinks and managed pet/hook copies
 ./install.sh create_codex_symlinks
 
 # Install shell/tooling support
@@ -75,6 +77,16 @@ Managed Codex pets are copied individually because Codex expects real pet packag
 The installer marks copied pets under `~/.codex/.dotfiles-managed-pets/` so later runs can update managed copies and remove stale managed copies after repository renames. Existing non-managed pet directories are skipped.
 
 Generated pet run folders such as `~/.codex/pet-runs/` remain local artifacts and are not copied into this repository.
+
+Shared hook scripts are copied into tool-owned directories rather than symlinked:
+
+```text
+~/.claude/agent-hooks/git-freshness.py
+~/.codex/agent-hooks/git-freshness.py
+~/.codex/hooks.json
+```
+
+The installer uses marker files under each tool directory so managed hook copies can be updated later without overwriting non-managed local hooks. Codex requires new or changed non-managed hooks to be reviewed and trusted with `/hooks` before they run.
 
 ## Development Guidelines
 

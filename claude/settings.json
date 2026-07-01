@@ -49,10 +49,27 @@
   },
   "model": "opus[1m]",
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/agent-hooks/git-freshness.py UserPromptSubmit",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/agent-hooks/git-freshness.py PreToolUse",
+            "timeout": 60
+          },
           {
             "type": "command",
             "command": "uv run --no-project $HOME/.claude/hooks/check-commit-signing.py"
@@ -64,6 +81,16 @@
           {
             "type": "command",
             "command": "uv run --no-project $HOME/.claude/hooks/validate-config.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/agent-hooks/git-freshness.py PreToolUse",
+            "timeout": 60
           }
         ]
       }

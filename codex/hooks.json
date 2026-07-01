@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.codex/agent-hooks/git-freshness.py\" SessionStart",
+            "timeout": 60,
+            "statusMessage": "Refreshing git remotes"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.codex/agent-hooks/git-freshness.py\" UserPromptSubmit",
+            "timeout": 60,
+            "statusMessage": "Refreshing git remotes"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.codex/agent-hooks/git-freshness.py\" PreToolUse",
+            "timeout": 60,
+            "statusMessage": "Checking git freshness"
+          }
+        ]
+      }
+    ]
+  }
+}

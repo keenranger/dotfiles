@@ -170,6 +170,62 @@ copy_codex_pet(){
 	printf "codex/pets/%s\n" "$name" > "$marker"
 }
 
+is_marked_managed_artifact(){
+	local marker=$1
+	local rel=$2
+
+	[ -f "$marker" ] && [ "$(cat "$marker")" = "$rel" ]
+}
+
+copy_managed_artifact(){
+	local src=$1
+	local dst=$2
+	local marker=$3
+	local rel=$4
+	local label=$5
+	local replace=false
+
+	mkdir -p "$(dirname "$dst")" "$(dirname "$marker")"
+
+	if [ ! -e "$dst" ] && [ ! -L "$dst" ]; then
+		replace=true
+	elif [ -L "$dst" ]; then
+		local target
+		target=$(readlink "$dst")
+		if [ "$target" = "$src" ] || is_marked_managed_artifact "$marker" "$rel"; then
+			replace=true
+		else
+			echo "Skipping existing non-managed $label symlink: $dst"
+			return 0
+		fi
+	elif is_marked_managed_artifact "$marker" "$rel"; then
+		replace=true
+	elif diff -qr "$src" "$dst" >/dev/null 2>&1; then
+		replace=true
+	else
+		echo "Skipping existing non-managed $label: $dst"
+		return 0
+	fi
+
+	if [ "$replace" = true ]; then
+		rm -rf "$dst"
+		cp -R "$src" "$dst"
+		printf "%s\n" "$rel" > "$marker"
+	fi
+}
+
+install_shared_agent_hooks(){
+	local dst=$1
+	local marker=$2
+
+	copy_managed_artifact "$SRCDIR/agent/hooks" "$dst" "$marker" "agent/hooks" "agent hooks"
+}
+
+install_codex_hooks(){
+	install_shared_agent_hooks "$HOME/.codex/agent-hooks" "$HOME/.codex/.dotfiles-managed-hooks/agent-hooks"
+	copy_managed_artifact "$SRCDIR/codex/hooks.json" "$HOME/.codex/hooks.json" "$HOME/.codex/.dotfiles-managed-hooks/hooks.json" "codex/hooks.json" "Codex hooks"
+}
+
 link_agent_skills(){
 	local dst_dir=$1
 
@@ -284,6 +340,7 @@ create_claude_symlinks(){
 	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.claude/AGENTS.md"
 	replace_symlink "$SRCDIR/agent/skills" "$HOME/.claude/skills"
+	install_shared_agent_hooks "$HOME/.claude/agent-hooks" "$HOME/.claude/.dotfiles-managed-hooks/agent-hooks"
 	replace_symlink_if_source_exists "$SRCDIR/claude/commands" "$HOME/.claude/commands"
 	replace_symlink_if_source_exists "$SRCDIR/claude/hooks" "$HOME/.claude/hooks"
 	replace_symlink_if_source_exists "$SRCDIR/claude/agents" "$HOME/.claude/agents"
@@ -295,6 +352,7 @@ create_codex_symlinks(){
 	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.codex/AGENTS.md"
 	link_agent_skills "$HOME/.codex/skills"
 	install_codex_pets "$HOME/.codex/pets"
+	install_codex_hooks
 }
 
 create_symlinks(){

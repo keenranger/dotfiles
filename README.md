@@ -6,7 +6,9 @@ Personal dotfiles and shared agent configuration for local development machines.
 
 - `agent/AGENTS.md`: shared instructions for Codex, Claude Code, and similar coding agents.
 - `agent/skills/`: shared workflow skills.
+- `agent/hooks/`: shared hook scripts used by Codex and Claude Code.
 - `codex/pets/`: managed Codex pet packages.
+- `codex/hooks.json`: managed Codex hook configuration.
 - `claude/`: Claude Code-specific settings, hooks, and agents.
 - `install.sh`: modular setup, symlink, and managed artifact installer.
 
@@ -19,14 +21,14 @@ Personal dotfiles and shared agent configuration for local development machines.
 # Company Codex machine setup without personal global Git identity
 ./install.sh codex_machine
 
-# Refresh symlinks and managed Codex pet copies
+# Refresh symlinks and managed Codex pet/hook copies
 ./install.sh create_symlinks
 
-# Refresh only Codex shared instructions, managed skill links, and managed pet copies
+# Refresh only Codex shared instructions, managed skill links, pet copies, and hooks
 ./install.sh create_codex_symlinks
 
 # Refresh only Claude Code shared instructions, skills, hooks, agents, and settings
 ./install.sh create_claude_symlinks
 ```
 
-`create_codex_symlinks` links managed shared skills individually into `~/.codex/skills` and copies managed pets into `~/.codex/pets` so Codex-installed runtime skills, non-managed symlinks, and non-managed pet directories remain in place.
+`create_codex_symlinks` links managed shared skills individually into `~/.codex/skills`, copies managed pets into `~/.codex/pets`, and installs managed hook files into `~/.codex/hooks.json` and `~/.codex/agent-hooks`. Codex-installed runtime skills, non-managed symlinks, non-managed pet directories, and non-managed hook files remain in place.
