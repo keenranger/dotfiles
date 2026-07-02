@@ -89,6 +89,17 @@
           }
         ]
       }
+    ],
+    "WorktreeCreate": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project $HOME/.claude/hooks/worktree-create-fresh.py"
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
