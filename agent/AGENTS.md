@@ -31,6 +31,22 @@
 - Research agent is the default for any exploration - external docs and internal codebase
 - Use multiple agents in parallel when possible; keep instructions goal-oriented, not prescriptive
 
+### Model routing
+Shared principles (any runtime - Claude Code or Codex):
+- Reserve the main loop for orchestration: architecture and design decisions, cross-cutting judgment, final review. Bulk reading, token-heavy sweeps, and mechanical edits go to cheaper delegates that report only findings back
+- Main-loop tiers today: Fable at high effort (Claude Code), gpt-5.5 at xhigh (Codex). Don't raise effort above these defaults for routine work
+- GUI/computer use routes through the Codex plugin stack in both runtimes - see Computer Use / GUI Automation
+
+Claude Code:
+- Exploration and codebase analysis: research agent (pinned sonnet)
+- Built-in agents (Explore, Plan, general-purpose) inherit the session model - pass model: sonnet explicitly for token-heavy sweeps (codebase mapping, bulk analysis, multi-location searches), haiku for purely mechanical scans. Applies when skills spawn them too (feature-dev's Explore step, review's extra general-purpose reviewers)
+- Implementation: hand well-specified, self-contained tasks to codex:codex-rescue proactively (write-capable) to conserve Claude quota - not only when stuck. Keep work in the main loop or code-implementation (opus) when it needs session context or tight iteration
+- New custom agents: pin model: in frontmatter - sonnet unless the task needs opus-level judgment. Unpinned agents silently inherit the session model
+
+Codex:
+- Token-heavy sweeps and side tasks: scoped `codex exec` one-shots downshifted via `-m <cheaper model>` or `-c model_reasoning_effort=low|medium` instead of the main xhigh thread
+- Review passes: `codex review` non-interactively rather than a full interactive session
+
 ## Git
 - Always sign commits with GPG (`git commit -S`)
 - Imperative messages: "Replace X", "Add Y" - no verbose prefixes like "Refactor: Replace ~"
