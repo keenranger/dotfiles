@@ -26,22 +26,22 @@ Present the test list to the user and wait for approval before proceeding. The u
 
 ## Phase 3: Execute Tests
 
-After approval, use Chrome browser automation (claude-in-chrome MCP tools) to execute each scenario:
+After approval, delegate execution to a subagent (`model: haiku`; sonnet if scenarios need judgment) that drives the claude-in-chrome MCP tools (loaded via ToolSearch) and returns structured results. Do not drive the browser loop in the main loop -- screenshots burn main-loop image tokens (see AGENTS.md "Computer Use / GUI Automation").
 
-### Setup
+### Setup (main loop, before spawning)
 1. Read `credentials.json` from project root for login credentials (if it exists)
 2. Read CLAUDE.md for deployment URLs (Dashboard URLs section)
 3. Use the test/staging URL by default, unless the user specifies otherwise
-4. Create a new tab and navigate to the deployment
+4. Hand the subagent a self-contained brief: deployment URL, auth notes, and the approved scenarios with verification criteria
 
-### Per scenario
-1. Perform the user action (navigate, click, select, etc.)
+### Per scenario (subagent)
+1. Create a new tab, navigate, and perform the user action (click, select, etc.)
 2. Take a screenshot
 3. Read console messages for errors (use `read_console_messages` with pattern filter for errors/warnings)
-4. Determine PASS/FAIL based on the verification criteria
+4. Record PASS/FAIL against the verification criteria; return text findings, not screenshots
 
 ### Resilience
-- If chrome extension loses access (common with other extensions), ask the user to click the tab and retry
+- If chrome extension loses access (common with other extensions), the subagent reports it back; ask the user to click the tab, then re-spawn from the failed scenario
 - If a scenario fails, continue with remaining scenarios (fail-forward)
 - If credentials.json is missing, skip auth-dependent scenarios and inform the user
 
@@ -55,5 +55,5 @@ Summarize results:
 Include:
 - Total pass/fail count
 - Console errors found (if any)
-- Screenshots taken for each step
+- Evidence reported by the executor subagent for each step
 - Recommendation: safe to merge or issues to fix
