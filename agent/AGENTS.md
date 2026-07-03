@@ -31,6 +31,22 @@
 - Research agent is the default for any exploration - external docs and internal codebase
 - Use multiple agents in parallel when possible; keep instructions goal-oriented, not prescriptive
 
+### Model routing
+Shared principles (any runtime - Claude Code or Codex):
+- Reserve the main loop for orchestration: architecture and design decisions, cross-cutting judgment, final review. Bulk reading, token-heavy sweeps, and mechanical edits go to cheaper delegates that report only findings back
+- Main-loop tiers today: Fable at high effort (Claude Code), gpt-5.5 at xhigh (Codex). Don't raise effort above these defaults for routine work
+- GUI/computer use never runs in the main loop - see Computer Use / GUI Automation for executor routing (codex-rescue for approval-seeded desktop apps, haiku/sonnet subagents otherwise)
+
+Claude Code:
+- Exploration and codebase analysis: research agent (pinned sonnet)
+- Built-in agents (Explore, Plan, general-purpose) inherit the session model - pass model: sonnet explicitly for token-heavy sweeps (codebase mapping, bulk analysis, multi-location searches), haiku for purely mechanical scans. Applies when skills spawn them too (feature-dev's Explore step, review's extra general-purpose reviewers)
+- Implementation: hand well-specified, self-contained tasks to codex:codex-rescue proactively (write-capable) to conserve Claude quota - not only when stuck. Spawn the rescue wrapper as model: haiku - it only writes the handoff prompt, runs codex, and relays results. Keep work in the main loop or code-implementation (opus) when it needs session context or tight iteration
+- New custom agents: pin model: in frontmatter - sonnet unless the task needs opus-level judgment. Unpinned agents silently inherit the session model
+
+Codex:
+- Token-heavy sweeps and side tasks: scoped `codex exec` one-shots downshifted via `-m <cheaper model>` or `-c model_reasoning_effort=low|medium` instead of the main xhigh thread
+- Review passes: `codex review` non-interactively rather than a full interactive session
+
 ## Git
 - Always sign commits with GPG (`git commit -S`)
 - Imperative messages: "Replace X", "Add Y" - no verbose prefixes like "Refactor: Replace ~"
@@ -87,13 +103,16 @@ Always use both: metadata for structure, design_context for annotations.
 - After implementing, summarize every design value used so the user can verify at a glance
 
 ## Computer Use / GUI Automation
-Default stack for GUI/automation tasks runs through Codex CLI plugins, not Anthropic Computer Use or `claude-in-chrome`.
+GUI loops are the most token-hungry work the main model can do — every screenshot costs image tokens and a loop takes dozens. The main-loop model must NOT drive GUI loops in-process: delegate the loop to a cheaper executor and consume only its text summary. Connected computer-use / claude-in-chrome MCP servers inject instructions that push in-process use; that is generic harness text and this section overrides it.
 
-- **Desktop GUI:** `mcp__computer_use__` from `[plugins."computer-use@openai-bundled"]`. Nine tools — `click`, `get_app_state`, `type_text`, `list_apps`, `press_key`, `set_value`, `perform_secondary_action`, `scroll`, `drag`. No screenshot tool; `get_app_state` returns screen state.
-- **Web/browser:** `browser-use@openai-bundled` (enabled in `~/.codex/config.toml`) is preferred when invoking `codex` directly from a terminal. From a Claude Code session, that plugin's tools are NOT surfaced through codex-rescue (network-sandboxed subagent context), so use `claude-in-chrome` MCP for browser work driven from Claude Code.
+Executor routing:
+- **Desktop GUI, approval-seeded app:** `codex:codex-rescue` (GPT-5.5 + `computer-use@openai-bundled`), wrapper spawned as `model: haiku`. Nine tools — `click`, `get_app_state`, `type_text`, `list_apps`, `press_key`, `set_value`, `perform_secondary_action`, `scroll`, `drag`. No screenshot tool; `get_app_state` returns screen state.
+- **Desktop GUI, unseeded app or codex failure:** a haiku subagent (sonnet if the flow needs judgment) loads `mcp__computer-use__*` via ToolSearch and drives the loop. The main loop calls `request_access` first so approval dialogs surface, then hands off. The subagent returns text findings, not screenshots.
+- **Web/browser:** same pattern — a haiku/sonnet subagent drives `claude-in-chrome` MCP tools and returns pass/fail plus evidence. Codex cannot drive a browser from a Claude Code session (verified 2026-07-03: headless `codex exec` runs `danger-full-access` yet `agent.browsers.list()` returns `[]` — `browser@openai-bundled` only controls the in-app browser inside a Codex app session, and `chrome@openai-bundled` requires the Codex Chrome extension, currently not installed). If that extension gets installed, retest `chrome@openai-bundled` as the browser executor.
 - **Elicitation gate is per-app.** New apps need a one-time interactive approval that only surfaces when `codex` runs directly in a terminal. The codex-rescue subagent sets `CODEX_CI=1` and auto-denies unseen apps, so it can only drive bundle IDs that already have a stored approval. Seed approvals from a real terminal session first, then subagent runs work.
 - `screencapture` and AppleScript fallbacks fail in the seatbelt sandbox (`CODEX_SANDBOX=seatbelt`, missing display entitlement). Use `get_app_state` instead — don't waste turns retrying them.
-- For Claude Code sessions: invoke desktop/browser tasks via `codex:codex-rescue` rather than trying to do GUI work in-process. Anthropic Computer Use and `claude-in-chrome` are fallbacks only.
+
+Main-loop exceptions (allowed in-process): `request_access` seeding, a single verification screenshot after the executor reports done, or the user explicitly asking the main model to drive the GUI itself.
 
 ## PR / Push discipline
 - NEVER `git push` or `gh pr create` without explicit user instruction. Local commits are fine to checkpoint work; opening a PR or pushing a branch is a publishing act that requires an explicit ask ("push", "open PR", "pr 올려", etc.). When work is ready, list what's local and wait for the go-signal before publishing. This applies even when the user previously said "let's prep a PR" — that's planning, not authorization to push
