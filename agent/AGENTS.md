@@ -35,12 +35,12 @@
 Shared principles (any runtime - Claude Code or Codex):
 - Reserve the main loop for orchestration: architecture and design decisions, cross-cutting judgment, final review. Bulk reading, token-heavy sweeps, and mechanical edits go to cheaper delegates that report only findings back
 - Main-loop tiers today: Fable at high effort (Claude Code), gpt-5.5 at xhigh (Codex). Don't raise effort above these defaults for routine work
-- GUI/computer use routes through the Codex plugin stack in both runtimes - see Computer Use / GUI Automation
+- GUI/computer use never runs in the main loop - see Computer Use / GUI Automation for executor routing (codex-rescue for approval-seeded desktop apps, haiku/sonnet subagents otherwise)
 
 Claude Code:
 - Exploration and codebase analysis: research agent (pinned sonnet)
 - Built-in agents (Explore, Plan, general-purpose) inherit the session model - pass model: sonnet explicitly for token-heavy sweeps (codebase mapping, bulk analysis, multi-location searches), haiku for purely mechanical scans. Applies when skills spawn them too (feature-dev's Explore step, review's extra general-purpose reviewers)
-- Implementation: hand well-specified, self-contained tasks to codex:codex-rescue proactively (write-capable) to conserve Claude quota - not only when stuck. Keep work in the main loop or code-implementation (opus) when it needs session context or tight iteration
+- Implementation: hand well-specified, self-contained tasks to codex:codex-rescue proactively (write-capable) to conserve Claude quota - not only when stuck. Spawn the rescue wrapper as model: haiku - it only writes the handoff prompt, runs codex, and relays results. Keep work in the main loop or code-implementation (opus) when it needs session context or tight iteration
 - New custom agents: pin model: in frontmatter - sonnet unless the task needs opus-level judgment. Unpinned agents silently inherit the session model
 
 Codex:
