@@ -27,6 +27,14 @@ Personal dotfiles and shared agent configuration for local development machines.
 
 # Refresh only Claude Code shared instructions, skills, hooks, agents, and settings
 ./install.sh create_claude_symlinks
+
+# Write an encrypted GnuPG key-store backup to a private backup directory
+./install.sh set_gpg backup /path/to/private/backup/dir
+
+# Restore an encrypted GnuPG key-store backup
+./install.sh set_gpg restore /path/to/gpg-secret-keys-YYYYMMDDTHHMMSSZ.tar.gz.gpg
 ```
 
 `create_codex_symlinks` links managed shared skills individually into `~/.codex/skills` and copies managed pets into `~/.codex/pets` so Codex-installed runtime skills, non-managed symlinks, and non-managed pet directories remain in place.
+
+`set_gpg backup` writes only a passphrase-encrypted archive to the target directory. It reads the archive encryption passphrase from `GPG_BACKUP_PASSPHRASE`, or on macOS from the `dotfiles.gpg-backup` generic Keychain item.

@@ -439,15 +439,196 @@ set_git(){
 	echo "Git configured: Hankyeol Kyung <kghnkl0103@gmail.com>"
 }
 
+get_gpg_backup_passphrase() (
+	{ set +x; } 2>/dev/null
+
+	if [ -n "${GPG_BACKUP_PASSPHRASE:-}" ]; then
+		printf "%s" "$GPG_BACKUP_PASSPHRASE"
+		return 0
+	fi
+
+	if [[ "$(uname)" = "Darwin" ]] && command -v security >/dev/null 2>&1; then
+		if security find-generic-password -s dotfiles.gpg-backup -a "$USER" -w 2>/dev/null; then
+			return 0
+		fi
+	fi
+
+	if [ -t 0 ]; then
+		local passphrase
+		read -r -s -p "GPG backup encryption passphrase: " passphrase
+		echo
+		[ -n "$passphrase" ] || { echo "Empty passphrase is not allowed" >&2; return 1; }
+		printf "%s" "$passphrase"
+		return 0
+	fi
+
+	echo "No GPG backup passphrase available." >&2
+	echo "Set GPG_BACKUP_PASSPHRASE, or on macOS store one with:" >&2
+	echo "  security add-generic-password -U -s dotfiles.gpg-backup -a \"\$USER\" -w" >&2
+	return 1
+)
+
+sha256_file(){
+	if command -v shasum >/dev/null 2>&1; then
+		shasum -a 256 "$1" | awk '{print $1}'
+	else
+		sha256sum "$1" | awk '{print $1}'
+	fi
+}
+
+set_gpg_backup(){
+	local dest_dir=${1:-}
+
+	if [ -z "$dest_dir" ]; then
+		echo "Usage: ./install.sh set_gpg backup DEST_DIR"
+		return 1
+	fi
+	if [ -n "${2:-}" ]; then
+		echo "set_gpg backup stores the current GnuPG key store; key selectors are not supported"
+		return 1
+	fi
+
+	local key_count
+	key_count=$(gpg --list-secret-keys --with-colons 2>/dev/null | awk -F: '/^sec/{count++} END{print count+0}')
+	[ "$key_count" -gt 0 ] || { echo "No GPG secret key found to back up"; return 1; }
+
+	local gnupg_home
+	gnupg_home=${GNUPGHOME:-$HOME/.gnupg}
+	[ -d "$gnupg_home/private-keys-v1.d" ] || { echo "No GnuPG private key store found: $gnupg_home/private-keys-v1.d"; return 1; }
+
+	mkdir -p "$dest_dir"
+
+	local tmpdir
+	tmpdir=$(mktemp -d)
+	(
+		set -euo pipefail
+		umask 077
+		trap 'rm -rf "$tmpdir"' EXIT
+
+		local payload_dir archive output checksum created_at host backup_home item
+		payload_dir="$tmpdir/payload"
+		backup_home="$payload_dir/gnupg-home"
+		mkdir -p "$payload_dir"
+		mkdir -p "$backup_home"
+
+		for item in private-keys-v1.d public-keys.d pubring.kbx pubring.gpg trustdb.gpg tofu.db openpgp-revocs.d common.conf gpg.conf gpg-agent.conf; do
+			if [ -e "$gnupg_home/$item" ] || [ -L "$gnupg_home/$item" ]; then
+				cp -a "$gnupg_home/$item" "$backup_home/"
+			fi
+		done
+		find "$backup_home" \( -name '*.lock' -o -name '.#lk*' \) -delete
+		gpg --list-secret-keys --keyid-format=long > "$payload_dir/keys.txt"
+		find "$backup_home" -type d -exec chmod 700 {} +
+		find "$backup_home" -type f -exec chmod 600 {} +
+
+		created_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+		host=$(hostname -s 2>/dev/null || hostname)
+		{
+			echo "created_at=$created_at"
+			echo "host=$host"
+			echo "format=gnupg-home-v1"
+			echo "restore=./install.sh set_gpg restore BACKUP_FILE.gpg"
+		} > "$payload_dir/metadata.txt"
+
+		archive="$tmpdir/gpg-secret-keys.tar.gz"
+		tar -czf "$archive" -C "$payload_dir" .
+
+		output="$dest_dir/gpg-secret-keys-$(date -u +"%Y%m%dT%H%M%SZ").tar.gz.gpg"
+		get_gpg_backup_passphrase | gpg --batch --yes --pinentry-mode loopback \
+			--passphrase-fd 0 --symmetric --cipher-algo AES256 \
+			--output "$output" "$archive"
+
+		checksum=$(sha256_file "$output")
+		printf "%s  %s\n" "$checksum" "$(basename "$output")" > "$output.sha256"
+
+		echo "Encrypted GPG backup written: $output"
+		echo "Checksum written: $output.sha256"
+	)
+}
+
+set_gpg_restore(){
+	local backup_file=${1:-}
+
+	if [ -z "$backup_file" ] || [ ! -f "$backup_file" ]; then
+		echo "Usage: ./install.sh set_gpg restore BACKUP_FILE.gpg"
+		return 1
+	fi
+
+	local tmpdir
+	tmpdir=$(mktemp -d)
+	(
+		set -euo pipefail
+		umask 077
+		trap 'rm -rf "$tmpdir"' EXIT
+
+		local archive payload_dir decrypt_home
+		archive="$tmpdir/gpg-secret-keys.tar.gz"
+		payload_dir="$tmpdir/payload"
+		decrypt_home="$tmpdir/decrypt-gnupg"
+		mkdir -p "$payload_dir"
+		mkdir -p "$decrypt_home"
+		chmod 700 "$decrypt_home"
+
+		get_gpg_backup_passphrase | GNUPGHOME="$decrypt_home" gpg --batch --yes --pinentry-mode loopback \
+			--passphrase-fd 0 --decrypt --output "$archive" "$backup_file"
+
+		tar -xzf "$archive" -C "$payload_dir"
+		if [ -d "$payload_dir/gnupg-home" ]; then
+			local gnupg_home backup_existing item
+			gnupg_home=${GNUPGHOME:-$HOME/.gnupg}
+			backup_existing="$gnupg_home.pre-restore-$(date -u +"%Y%m%dT%H%M%SZ")"
+			mkdir -p "$gnupg_home"
+			chmod 700 "$gnupg_home"
+			for item in "$payload_dir"/gnupg-home/*; do
+				[ -e "$item" ] || continue
+				if [ -e "$gnupg_home/$(basename "$item")" ] || [ -L "$gnupg_home/$(basename "$item")" ]; then
+					mkdir -p "$backup_existing"
+					mv "$gnupg_home/$(basename "$item")" "$backup_existing/"
+				fi
+				cp -a "$item" "$gnupg_home/"
+			done
+			find "$gnupg_home" -type d -exec chmod 700 {} +
+			find "$gnupg_home" -type f -exec chmod 600 {} +
+			echo "Restored encrypted GnuPG key store backup to $gnupg_home"
+			if [ -d "$backup_existing" ]; then
+				echo "Previous GnuPG files moved to $backup_existing"
+			fi
+		else
+			echo "Error: Invalid backup format (gnupg-home directory not found)" >&2
+			exit 1
+		fi
+	)
+
+	set_gpg
+}
+
 set_gpg(){
 	# Configure GPG for git commit signing (shared key approach)
 	# Usage:
 	#   ./install.sh set_gpg              - configure git with existing key
-	#   ./install.sh set_gpg export       - export private key to ./private.key
+	#   ./install.sh set_gpg export --unsafe-plaintext
 	#   ./install.sh set_gpg import FILE  - import key, trust, configure, delete file
+	#   ./install.sh set_gpg backup DIR   - write encrypted key backup to DIR
+	#   ./install.sh set_gpg restore FILE - restore encrypted key backup
 
 	case "${1:-}" in
+		backup)
+			shift
+			set_gpg_backup "$@"
+			return $?
+			;;
+		restore)
+			shift
+			set_gpg_restore "$@"
+			return $?
+			;;
 		export)
+			if [ "${2:-}" != "--unsafe-plaintext" ]; then
+				echo "Plaintext GPG export is disabled by default."
+				echo "Use './install.sh set_gpg backup DIR' for an encrypted backup."
+				echo "To force a raw private.key export, rerun with: ./install.sh set_gpg export --unsafe-plaintext"
+				return 1
+			fi
 			KEY_ID=$(gpg --list-secret-keys --keyid-format=long 2>/dev/null | awk -F'/' '/^sec/{print $2}' | cut -d' ' -f1 | head -1)
 			[ -z "$KEY_ID" ] && { echo "No key to export"; return 1; }
 			gpg --export-secret-keys --armor "$KEY_ID" > private.key
