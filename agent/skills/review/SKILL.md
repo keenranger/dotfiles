@@ -17,10 +17,11 @@ Resolve a bare #N with `gh pr view N`, falling back to `gh issue view N`. An exp
 
 ## 2. Dispatch reviewers (parallel)
 
-- LOCAL: git-diff-reviewer agent (Claude) + codex:codex-rescue agent (Codex -- do not name a model in the dispatch prompt; the codex CLI's configured default applies)
+- LOCAL: git-diff-reviewer agent (Claude) + codex:codex-rescue agent (Codex)
 - PR: pr-issue-reviewer agent (fetches `gh pr view` + `gh pr diff`) + codex:codex-rescue agent given the `gh pr diff N` output as explicit input -- codex:codex-rescue reads local git state, so the PR branch may not be checked out; pass the fetched patch instead of relying on the workspace
 - ISSUE: pr-issue-reviewer agent (fetches `gh issue view`; instruct it to report an issue verdict -- ready to implement / needs clarification -- not its default PR merge verdict) + a general-purpose agent that investigates the codebase for feasibility
 - Complex or critical targets: add 1-2 general-purpose agents for additional perspectives
+- codex:codex-rescue dispatches: request `--effort xhigh`; never name a model -- the codex CLI's configured default applies
 
 After all agents return, normalize each reviewer's severity labels into critical/major/minor (e.g. git-diff-reviewer's Suggestions, pr-issue-reviewer's Blockers/Important/Consider), then deduplicate and elevate issues flagged by multiple reviewers.
 
