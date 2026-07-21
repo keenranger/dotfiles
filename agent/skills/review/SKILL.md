@@ -22,6 +22,7 @@ Resolve a bare #N with `gh pr view N`, falling back to `gh issue view N`. An exp
 - ISSUE: pr-issue-reviewer agent (fetches `gh issue view`; instruct it to report an issue verdict -- ready to implement / needs clarification -- not its default PR merge verdict) + a general-purpose agent that investigates the codebase for feasibility
 - Complex or critical targets: add 1-2 general-purpose agents for additional perspectives
 - codex:codex-rescue dispatches: request `--effort xhigh`; never name a model -- the codex CLI's configured default applies
+- git-diff-reviewer dispatches (LOCAL only): spawn with `model: fable` -- top-tier judgment for reviewing our own work. Investigative agents (pr-issue-reviewer, general-purpose feasibility/extra reviewers) and other git-diff-reviewer callers such as /commit keep their cheaper defaults
 
 After all agents return, normalize each reviewer's severity labels into critical/major/minor (e.g. git-diff-reviewer's Suggestions, pr-issue-reviewer's Blockers/Important/Consider), then deduplicate and elevate issues flagged by multiple reviewers.
 
