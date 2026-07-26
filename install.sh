@@ -441,30 +441,29 @@ set_git(){
 
 get_gpg_backup_passphrase() (
 	{ set +x; } 2>/dev/null
+	local mode=${1:-restore}
 
 	if [ -n "${GPG_BACKUP_PASSPHRASE:-}" ]; then
 		printf "%s" "$GPG_BACKUP_PASSPHRASE"
 		return 0
 	fi
 
-	if [[ "$(uname)" = "Darwin" ]] && command -v security >/dev/null 2>&1; then
-		if security find-generic-password -s dotfiles.gpg-backup -a "$USER" -w 2>/dev/null; then
-			return 0
-		fi
-	fi
-
 	if [ -t 0 ]; then
-		local passphrase
-		read -r -s -p "GPG backup encryption passphrase: " passphrase
-		echo
+		local passphrase confirmation
+		read -r -s -p "GPG backup recovery passphrase: " passphrase
+		echo >&2
 		[ -n "$passphrase" ] || { echo "Empty passphrase is not allowed" >&2; return 1; }
+		if [ "$mode" = "backup" ]; then
+			read -r -s -p "Confirm GPG backup recovery passphrase: " confirmation
+			echo >&2
+			[ "$passphrase" = "$confirmation" ] || { echo "Passphrases do not match" >&2; return 1; }
+		fi
 		printf "%s" "$passphrase"
 		return 0
 	fi
 
 	echo "No GPG backup passphrase available." >&2
-	echo "Set GPG_BACKUP_PASSPHRASE, or on macOS store one with:" >&2
-	echo "  security add-generic-password -U -s dotfiles.gpg-backup -a \"\$USER\" -w" >&2
+	echo "Run this command interactively, or set GPG_BACKUP_PASSPHRASE for automation." >&2
 	return 1
 )
 
@@ -474,6 +473,25 @@ sha256_file(){
 	else
 		sha256sum "$1" | awk '{print $1}'
 	fi
+}
+
+verify_gpg_backup_checksum(){
+	local backup_file=$1
+	local checksum_file="$backup_file.sha256"
+
+	if [ ! -f "$checksum_file" ]; then
+		echo "Warning: checksum file not found: $checksum_file" >&2
+		return 0
+	fi
+
+	local expected actual
+	expected=$(awk 'NR == 1 {print $1}' "$checksum_file")
+	actual=$(sha256_file "$backup_file")
+	[ -n "$expected" ] && [ "$expected" = "$actual" ] || {
+		echo "Error: GPG backup checksum mismatch: $backup_file" >&2
+		return 1
+	}
+	echo "GPG backup checksum verified: $backup_file"
 }
 
 set_gpg_backup(){
@@ -491,10 +509,8 @@ set_gpg_backup(){
 	local key_count
 	key_count=$(gpg --list-secret-keys --with-colons 2>/dev/null | awk -F: '/^sec/{count++} END{print count+0}')
 	[ "$key_count" -gt 0 ] || { echo "No GPG secret key found to back up"; return 1; }
-
 	local gnupg_home
 	gnupg_home=${GNUPGHOME:-$HOME/.gnupg}
-	[ -d "$gnupg_home/private-keys-v1.d" ] || { echo "No GnuPG private key store found: $gnupg_home/private-keys-v1.d"; return 1; }
 
 	mkdir -p "$dest_dir"
 
@@ -505,28 +521,30 @@ set_gpg_backup(){
 		umask 077
 		trap 'rm -rf "$tmpdir"' EXIT
 
-		local payload_dir archive output checksum created_at host backup_home item
+		local payload_dir archive output checksum created_at host passphrase_file
 		payload_dir="$tmpdir/payload"
-		backup_home="$payload_dir/gnupg-home"
+		passphrase_file="$tmpdir/recovery-passphrase"
 		mkdir -p "$payload_dir"
-		mkdir -p "$backup_home"
+		get_gpg_backup_passphrase backup > "$passphrase_file"
+		chmod 600 "$passphrase_file"
 
-		for item in private-keys-v1.d public-keys.d pubring.kbx pubring.gpg trustdb.gpg tofu.db openpgp-revocs.d common.conf gpg.conf gpg-agent.conf; do
-			if [ -e "$gnupg_home/$item" ] || [ -L "$gnupg_home/$item" ]; then
-				cp -a "$gnupg_home/$item" "$backup_home/"
-			fi
-		done
-		find "$backup_home" \( -name '*.lock' -o -name '.#lk*' \) -delete
+		gpg --batch --yes --armor --export > "$payload_dir/public-keys.asc"
+		gpg --batch --yes --pinentry-mode loopback --passphrase-file "$passphrase_file" \
+			--armor --export-secret-keys > "$payload_dir/secret-keys.asc"
+		[ -s "$payload_dir/secret-keys.asc" ] || { echo "Failed to export GPG secret keys" >&2; exit 1; }
+		gpg --export-ownertrust > "$payload_dir/ownertrust.txt"
 		gpg --list-secret-keys --keyid-format=long > "$payload_dir/keys.txt"
-		find "$backup_home" -type d -exec chmod 700 {} +
-		find "$backup_home" -type f -exec chmod 600 {} +
+		if [ -d "$gnupg_home/openpgp-revocs.d" ]; then
+			mkdir -p "$payload_dir/openpgp-revocs.d"
+			cp -a "$gnupg_home/openpgp-revocs.d/." "$payload_dir/openpgp-revocs.d/"
+		fi
 
 		created_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 		host=$(hostname -s 2>/dev/null || hostname)
 		{
 			echo "created_at=$created_at"
 			echo "host=$host"
-			echo "format=gnupg-home-v1"
+			echo "format=gnupg-export-v2"
 			echo "restore=./install.sh set_gpg restore BACKUP_FILE.gpg"
 		} > "$payload_dir/metadata.txt"
 
@@ -534,8 +552,8 @@ set_gpg_backup(){
 		tar -czf "$archive" -C "$payload_dir" .
 
 		output="$dest_dir/gpg-secret-keys-$(date -u +"%Y%m%dT%H%M%SZ").tar.gz.gpg"
-		get_gpg_backup_passphrase | gpg --batch --yes --pinentry-mode loopback \
-			--passphrase-fd 0 --symmetric --cipher-algo AES256 \
+		gpg --batch --yes --pinentry-mode loopback --passphrase-file "$passphrase_file" \
+			--symmetric --cipher-algo AES256 \
 			--output "$output" "$archive"
 
 		checksum=$(sha256_file "$output")
@@ -554,6 +572,8 @@ set_gpg_restore(){
 		return 1
 	fi
 
+	verify_gpg_backup_checksum "$backup_file"
+
 	local tmpdir
 	tmpdir=$(mktemp -d)
 	(
@@ -569,11 +589,29 @@ set_gpg_restore(){
 		mkdir -p "$decrypt_home"
 		chmod 700 "$decrypt_home"
 
-		get_gpg_backup_passphrase | GNUPGHOME="$decrypt_home" gpg --batch --yes --pinentry-mode loopback \
+		get_gpg_backup_passphrase restore | GNUPGHOME="$decrypt_home" gpg --batch --yes --pinentry-mode loopback \
 			--passphrase-fd 0 --decrypt --output "$archive" "$backup_file"
 
 		tar -xzf "$archive" -C "$payload_dir"
-		if [ -d "$payload_dir/gnupg-home" ]; then
+		if [ -s "$payload_dir/secret-keys.asc" ]; then
+			local gnupg_home
+			gnupg_home=${GNUPGHOME:-$HOME/.gnupg}
+			mkdir -p "$gnupg_home"
+			chmod 700 "$gnupg_home"
+			if [ -s "$payload_dir/public-keys.asc" ]; then
+				GNUPGHOME="$gnupg_home" gpg --batch --import "$payload_dir/public-keys.asc"
+			fi
+			GNUPGHOME="$gnupg_home" gpg --batch --import "$payload_dir/secret-keys.asc"
+			if [ -s "$payload_dir/ownertrust.txt" ]; then
+				GNUPGHOME="$gnupg_home" gpg --batch --import-ownertrust "$payload_dir/ownertrust.txt"
+			fi
+			if [ -d "$payload_dir/openpgp-revocs.d" ]; then
+				mkdir -p "$gnupg_home/openpgp-revocs.d"
+				cp -a "$payload_dir/openpgp-revocs.d/." "$gnupg_home/openpgp-revocs.d/"
+				find "$gnupg_home/openpgp-revocs.d" -type f -exec chmod 600 {} +
+			fi
+			echo "Imported portable GnuPG backup into $gnupg_home"
+		elif [ -d "$payload_dir/gnupg-home" ]; then
 			local gnupg_home backup_existing item
 			gnupg_home=${GNUPGHOME:-$HOME/.gnupg}
 			backup_existing="$gnupg_home.pre-restore-$(date -u +"%Y%m%dT%H%M%SZ")"
@@ -585,7 +623,7 @@ set_gpg_restore(){
 					mkdir -p "$backup_existing"
 					mv "$gnupg_home/$(basename "$item")" "$backup_existing/"
 				fi
-				cp -a "$item" "$gnupg_home/"
+				cp -aL "$item" "$gnupg_home/"
 			done
 			find "$gnupg_home" -type d -exec chmod 700 {} +
 			find "$gnupg_home" -type f -exec chmod 600 {} +
@@ -594,7 +632,7 @@ set_gpg_restore(){
 				echo "Previous GnuPG files moved to $backup_existing"
 			fi
 		else
-			echo "Error: Invalid backup format (gnupg-home directory not found)" >&2
+			echo "Error: Invalid GPG backup format" >&2
 			exit 1
 		fi
 	)
@@ -656,7 +694,7 @@ set_gpg(){
 	git config --global user.signingkey "$KEY_ID"
 	git config --global commit.gpgsign true
 	git config --global tag.gpgsign true
-	[[ "$(uname)" = "Darwin" ]] && git config --global gpg.program /opt/homebrew/bin/gpg
+	git config --global gpg.program "$(command -v gpg)"
 
 	gpgconf --kill gpg-agent
 
