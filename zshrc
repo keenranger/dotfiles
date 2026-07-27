@@ -155,6 +155,59 @@ adb-connect-windows() {
 
 cc() { command claude "$@"; }
 
+# Claude Desktop runs WorktreeCreate hooks only when the repo folder itself has
+# accepted the trust dialog (projects.<dir>.hasTrustDialogAccepted in
+# ~/.claude.json). Ancestor trust (e.g. ~/src) starts plain sessions without ever
+# showing the dialog, so fresh clones can never acquire the flag on their own.
+# claude-trust writes the same flag Desktop's acceptTrustDialog writes.
+claude-trust() {
+    local dir cfg="$HOME/.claude.json" tmp
+    dir=$(cd "${1:-.}" 2>/dev/null && pwd -P) || return 0
+    command -v jq >/dev/null 2>&1 || return 0
+    [[ -f "$cfg" ]] || return 0
+    [[ $(jq --arg d "$dir" '.projects[$d].hasTrustDialogAccepted // false' "$cfg") == true ]] && return 0
+    # mktemp: unique name (concurrent invocations don't share a temp path) and
+    # 0600 mode (never loosens a permission-restricted config on replace).
+    tmp=$(command mktemp "$cfg.XXXXXX") || return 0
+    if jq --arg d "$dir" '.projects[$d] = ((.projects[$d] // {}) + {hasTrustDialogAccepted: true})' "$cfg" > "$tmp"; then
+        command mv "$tmp" "$cfg" && echo "claude-trust: trusted $dir"
+    else
+        command rm -f "$tmp"
+    fi
+}
+
+# Resolve the directory a `gh repo clone` / `gh repo create --clone` invocation
+# produces; prints nothing when the argv is not one of those.
+_claude_trust_gh_target() {
+    [[ "${1:-}" == "repo" ]] || return 0
+    local sub="${2:-}" arg skip=0
+    local -a pos=()
+    for arg in "${@:3}"; do
+        [[ "$arg" == "--" ]] && break
+        if (( skip )); then skip=0; continue; fi
+        case "$arg" in
+            -u|--upstream-remote-name|-t|--team|-d|--description|-g|--gitignore|-l|--license|-p|--template|-s|--source|-r|--remote|-h|--homepage) skip=1 ;;
+            -*) ;;
+            *) pos+=("$arg") ;;
+        esac
+    done
+    case "$sub" in
+        clone) print -r -- "${pos[2]:-${${pos[1]:t}%.git}}" ;;
+        create) [[ " ${*:3} " == *" --clone "* || " ${*:3} " == *" -c "* ]] && print -r -- "${pos[1]:t}" ;;
+    esac
+    return 0
+}
+
+# Auto-trust repos arriving via `gh repo clone` / `gh repo create --clone` so
+# Claude Desktop worktree sessions work in them without manual steps.
+gh() {
+    command gh "$@" || return $?
+    local dir
+    dir=$(_claude_trust_gh_target "$@")
+    [[ -n "$dir" && -d "$dir" ]] && claude-trust "$dir"
+    return 0
+}
+
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 # Added by Antigravity
