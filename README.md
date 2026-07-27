@@ -13,10 +13,13 @@ Personal dotfiles and shared agent configuration for local development machines.
 ## Common Commands
 
 ```bash
-# Full personal-machine setup
+# Full personal-machine bootstrap (one administrator prompt)
 ./install.sh
 
-# Company Codex machine setup without personal global Git identity
+# Bootstrap and restore a separate encrypted GPG credential backup
+./install.sh bootstrap --gpg-backup /path/to/gpg-secret-keys-YYYYMMDDTHHMMSSZ.tar.gz.gpg
+
+# Company Codex machine bootstrap without personal global Git identity
 ./install.sh codex_machine
 
 # Refresh symlinks and managed Codex pet copies
@@ -34,6 +37,12 @@ Personal dotfiles and shared agent configuration for local development machines.
 # Restore the backup on any machine with GnuPG installed
 ./install.sh set_gpg restore /path/to/gpg-secret-keys-YYYYMMDDTHHMMSSZ.tar.gz.gpg
 ```
+
+Both full-machine profiles validate administrator access once with `sudo -v`, keep that timestamp alive only while the bootstrap process runs, and use non-interactive `sudo -n` for later privileged steps. The personal profile runs in this order: shell and tooling, global Git identity, dotfile symlinks, optional GPG restore, Claude Code and macOS apps including ChatGPT, then a short list of remaining sign-in and macOS permission steps. The GPG backup passphrase remains a separate prompt. Existing individual setup commands remain available for interactive use.
+
+If `/Applications/ChatGPT.app` already exists, the installer skips its Homebrew cask and continues installing the other apps independently.
+
+When a dotfile destination already contains a real file, directory, or different symlink, the installer moves it into a dated directory under `~/.dotfiles-backups/` before creating the managed symlink. Re-running against an already-correct managed symlink leaves it unchanged.
 
 `create_codex_symlinks` links managed shared skills individually into `~/.codex/skills` and copies managed pets into `~/.codex/pets` so Codex-installed runtime skills, non-managed symlinks, and non-managed pet directories remain in place.
 
