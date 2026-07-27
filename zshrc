@@ -161,14 +161,19 @@ cc() { command claude "$@"; }
 # showing the dialog, so fresh clones can never acquire the flag on their own.
 # claude-trust writes the same flag Desktop's acceptTrustDialog writes.
 claude-trust() {
-    local dir cfg="$HOME/.claude.json"
+    local dir cfg="$HOME/.claude.json" tmp
     dir=$(cd "${1:-.}" 2>/dev/null && pwd -P) || return 0
     command -v jq >/dev/null 2>&1 || return 0
     [[ -f "$cfg" ]] || return 0
     [[ $(jq --arg d "$dir" '.projects[$d].hasTrustDialogAccepted // false' "$cfg") == true ]] && return 0
-    jq --arg d "$dir" '.projects[$d] = ((.projects[$d] // {}) + {hasTrustDialogAccepted: true})' "$cfg" > "$cfg.new" \
-        && command mv "$cfg.new" "$cfg" \
-        && echo "claude-trust: trusted $dir"
+    # mktemp: unique name (concurrent invocations don't share a temp path) and
+    # 0600 mode (never loosens a permission-restricted config on replace).
+    tmp=$(command mktemp "$cfg.XXXXXX") || return 0
+    if jq --arg d "$dir" '.projects[$d] = ((.projects[$d] // {}) + {hasTrustDialogAccepted: true})' "$cfg" > "$tmp"; then
+        command mv "$tmp" "$cfg" && echo "claude-trust: trusted $dir"
+    else
+        command rm -f "$tmp"
+    fi
 }
 
 # Resolve the directory a `gh repo clone` / `gh repo create --clone` invocation
