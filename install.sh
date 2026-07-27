@@ -3,6 +3,7 @@ set -euo pipefail
 
 SRCDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 CHECK_OS=$(uname)
+DARWIN_APPLICATIONS_DIR=${DARWIN_APPLICATIONS_DIR:-/Applications}
 
 COMMON_BREW_PACKAGES=(
 	zsh
@@ -34,7 +35,7 @@ DARWIN_FONT_CASKS=(
 
 DARWIN_APP_CASKS=(
 	google-chrome
-	codex-app
+	chatgpt
 	ghostty
 	rectangle
 	karabiner-elements
@@ -45,7 +46,7 @@ DARWIN_APP_CASKS=(
 
 DARWIN_CODEX_MACHINE_CASKS=(
 	google-chrome
-	codex-app
+	chatgpt
 	ghostty
 	rectangle
 	grandperspective
@@ -69,15 +70,78 @@ brew_install(){
 
 brew_install_casks(){
 	[ "$#" -eq 0 ] && return 0
-	brew install --cask "$@"
+	local cask failed=0
+	for cask in "$@"; do
+		if [ "$cask" = "chatgpt" ] && [ -d "$DARWIN_APPLICATIONS_DIR/ChatGPT.app" ]; then
+			echo "ChatGPT already installed, skipping"
+		elif brew list --cask "$cask" >/dev/null 2>&1; then
+			echo "$cask already installed, skipping"
+		else
+			brew install --cask "$cask" || failed=1
+		fi
+	done
+	return "$failed"
 }
+
+BOOTSTRAP_ACTIVE=0
+SUDO_KEEPALIVE_PID=
+DOTFILES_BACKUP_DIR=${DOTFILES_BACKUP_DIR:-}
+
+run_privileged(){
+	if [ "$BOOTSTRAP_ACTIVE" = 1 ]; then
+		sudo -n "$@"
+	else
+		sudo "$@"
+	fi
+}
+
+stop_sudo_keepalive(){
+	if [ -n "$SUDO_KEEPALIVE_PID" ]; then
+		kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+		wait "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+		SUDO_KEEPALIVE_PID=
+	fi
+}
+
+start_sudo_keepalive(){
+	echo "Requesting administrator access for bootstrap..."
+	sudo -v
+
+	(
+		sleep_pid=
+		stop_keepalive_sleep(){
+			if [ -n "$sleep_pid" ]; then
+				kill "$sleep_pid" 2>/dev/null || true
+				wait "$sleep_pid" 2>/dev/null || true
+			fi
+		}
+		trap 'stop_keepalive_sleep; exit' TERM INT
+		while true; do
+			sleep 50 &
+			sleep_pid=$!
+			wait "$sleep_pid" || exit
+			sleep_pid=
+			sudo -n -v || exit
+		done
+	) &
+	SUDO_KEEPALIVE_PID=$!
+}
+
+with_sudo_session() (
+	BOOTSTRAP_ACTIVE=1
+	start_sudo_keepalive
+	trap stop_sudo_keepalive EXIT
+	"$@"
+)
 
 ensure_homebrew(){
 	if ! command -v brew &> /dev/null; then
 		echo "Installing Homebrew..."
 		if [[ "$CHECK_OS" = "Darwin" ]]; then
-			echo "Requesting sudo access for Homebrew install..."
-			sudo -v
+			if [ "$BOOTSTRAP_ACTIVE" != 1 ]; then
+				echo "Requesting sudo access for Homebrew install..."
+				sudo -v
+			fi
 		fi
 		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 		if [[ "$CHECK_OS" = "Darwin" ]]; then
@@ -88,13 +152,39 @@ ensure_homebrew(){
 	fi
 }
 
+backup_existing_path(){
+	local path=$1
+	local relative_path
+
+	if [ -z "$DOTFILES_BACKUP_DIR" ]; then
+		DOTFILES_BACKUP_DIR="$HOME/.dotfiles-backups/$(date -u +"%Y%m%dT%H%M%SZ")-$$"
+	fi
+	case "$path" in
+		"$HOME"/*)
+			relative_path=${path#"$HOME"/}
+			;;
+		*)
+			relative_path=$(basename "$path")
+			;;
+	esac
+
+	local backup_path="$DOTFILES_BACKUP_DIR/$relative_path"
+	mkdir -p "$(dirname "$backup_path")"
+	mv "$path" "$backup_path"
+	echo "Backed up existing path: $path -> $backup_path"
+}
+
 replace_symlink(){
 	local src=$1
 	local dst=$2
 
-	if [ -L "$dst" ] || [ -e "$dst" ]; then
-		rm -rf "$dst"
+	if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
+		return 0
 	fi
+	if [ -L "$dst" ] || [ -e "$dst" ]; then
+		backup_existing_path "$dst"
+	fi
+	mkdir -p "$(dirname "$dst")"
 	ln -s "$src" "$dst"
 }
 
@@ -105,7 +195,14 @@ replace_symlink_if_source_exists(){
 	if [ -e "$src" ] || [ -L "$src" ]; then
 		replace_symlink "$src" "$dst"
 	elif [ -L "$dst" ]; then
-		rm -f "$dst"
+		case "$(readlink "$dst")" in
+			"$SRCDIR"/*|"$HOME/.codex/worktrees"/*/dotfiles/*)
+				rm -f "$dst"
+				;;
+			*)
+				echo "Skipping existing non-managed symlink: $dst"
+				;;
+		esac
 	fi
 }
 
@@ -117,6 +214,9 @@ is_managed_skill_symlink(){
 	case "$target" in
 		"$SRCDIR/agent/skills"/*|"$SRCDIR/claude/skills"/*)
 			return 0
+			;;
+		"$HOME/.codex/worktrees"/*/dotfiles/agent/skills/*|"$HOME/.codex/worktrees"/*/dotfiles/claude/skills/*)
+			[ "$(basename "$target")" = "$(basename "$dst")" ]
 			;;
 		*)
 			return 1
@@ -260,22 +360,20 @@ install_codex_pets(){
 }
 
 create_shell_symlinks(){
-	ln -sf "$SRCDIR/vimrc" "$HOME/.vimrc"
-	ln -sf "$SRCDIR/tmux.conf" "$HOME/.tmux.conf"
-	ln -sf "$SRCDIR/zshrc" "$HOME/.zshrc"
+	replace_symlink "$SRCDIR/vimrc" "$HOME/.vimrc"
+	replace_symlink "$SRCDIR/tmux.conf" "$HOME/.tmux.conf"
+	replace_symlink "$SRCDIR/zshrc" "$HOME/.zshrc"
 	# Ensure .config directory exists
 	mkdir -p "$HOME/.config"
-	# Remove existing nvim symlink to prevent recursive linking
-	[ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
-	ln -sf "$SRCDIR/config/nvim" "$HOME/.config/nvim"
+	replace_symlink "$SRCDIR/config/nvim" "$HOME/.config/nvim"
 	# macOS only configurations
 	if [[ "$(uname)" = "Darwin" ]]; then
 		mkdir -p "$HOME/.config/karabiner"
-		ln -sf "$SRCDIR/config/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json"
+		replace_symlink "$SRCDIR/config/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json"
 		mkdir -p "$HOME/.gnupg"
 		chmod 700 "$HOME/.gnupg"
-		ln -sf "$SRCDIR/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
-		ln -sf "$SRCDIR/gnupg/common.conf" "$HOME/.gnupg/common.conf"
+		replace_symlink "$SRCDIR/gnupg/gpg-agent.conf" "$HOME/.gnupg/gpg-agent.conf"
+		replace_symlink "$SRCDIR/gnupg/common.conf" "$HOME/.gnupg/common.conf"
 	fi
 }
 
@@ -313,8 +411,8 @@ set_zsh(){
 		brew_install_casks "${DARWIN_FONT_CASKS[@]}"
 	else
 		# Linux installation
-		sudo apt update
-		sudo apt install -y "${LINUX_BASE_APT_PACKAGES[@]}"
+		run_privileged apt update
+		run_privileged apt install -y "${LINUX_BASE_APT_PACKAGES[@]}"
 		brew_install "${COMMON_BREW_PACKAGES[@]}"
 	fi
 
@@ -327,10 +425,14 @@ set_zsh(){
 	ZSH_PATH=$(command -v zsh)
 	if ! grep -qx "$ZSH_PATH" /etc/shells; then
 		echo "Adding $ZSH_PATH to /etc/shells"
-		echo "$ZSH_PATH" | sudo tee -a /etc/shells
+		echo "$ZSH_PATH" | run_privileged tee -a /etc/shells
 	fi
 	if [[ "$SHELL" != "$ZSH_PATH" ]]; then
-		chsh -s "$ZSH_PATH"
+		if [ "$BOOTSTRAP_ACTIVE" = 1 ]; then
+			run_privileged chsh -s "$ZSH_PATH" "$(id -un)"
+		else
+			chsh -s "$ZSH_PATH"
+		fi
 	fi
 
 	# Install Oh My Zsh if not already installed
@@ -414,7 +516,7 @@ set_cloud(){
 		# AWS CLI
 		curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 		unzip awscliv2.zip
-		sudo ./aws/install
+		run_privileged ./aws/install
 		rm -rf aws awscliv2.zip
 		# OpenTofu 
 		curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
@@ -711,8 +813,8 @@ container(){
 		podman machine start
 	else
 		# Linux installation
-		sudo apt-get update
-		sudo apt-get install -y podman
+		run_privileged apt-get update
+		run_privileged apt-get install -y podman
 		# Enable podman socket for Docker compatibility
 		systemctl --user enable --now podman.socket
 		# Install podman-compose via pip on Linux
@@ -723,7 +825,9 @@ container(){
 usage(){
 	cat <<'EOF'
 Usage:
-  ./install.sh                    Run the personal default profile
+  ./install.sh                    Bootstrap a personal machine with one administrator prompt
+  ./install.sh bootstrap [--gpg-backup FILE]
+                                  Run the same bootstrap with an optional GPG restore
   ./install.sh codex_machine      Run the company Codex machine profile
   ./install.sh <command> [args]   Run one setup command
 
@@ -738,36 +842,86 @@ Commands:
   set_cloud
   set_claude
   set_git
-  set_gpg [export|import FILE]
+  set_gpg [backup DIR|restore FILE|export --unsafe-plaintext|import FILE]
   set_codex_machine
   container
 EOF
 }
 
-default_install(){
+remaining_manual_actions(){
+	cat <<'EOF'
+
+Remaining manual actions:
+  - Sign in to ChatGPT, Claude Code, GitHub, and Tailscale as needed.
+  - Approve requested macOS privacy and security permissions.
+  - Add Korean (두벌식) in System Settings > Keyboard > Input Sources.
+EOF
+}
+
+personal_install(){
+	local gpg_backup=$1
+
 	set_zsh
 	set_git
 	create_symlinks
+	if [ -n "$gpg_backup" ]; then
+		set_gpg restore "$gpg_backup"
+	fi
 	set_claude
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		set_mac
 	fi
+	remaining_manual_actions
+}
+
+bootstrap(){
+	local gpg_backup=
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+			--gpg-backup)
+				[ "$#" -ge 2 ] || { echo "Missing file after --gpg-backup" >&2; return 1; }
+				gpg_backup=$2
+				shift 2
+				;;
+			*)
+				echo "Unknown bootstrap option: $1" >&2
+				return 1
+				;;
+		esac
+	done
+
+	if [ -n "$gpg_backup" ] && [ ! -f "$gpg_backup" ]; then
+		echo "GPG backup not found: $gpg_backup" >&2
+		return 1
+	fi
+
+	with_sudo_session personal_install "$gpg_backup"
+}
+
+codex_machine_install(){
+	set_codex_machine
+	remaining_manual_actions
+}
+
+bootstrap_codex_machine(){
+	[ "$#" -eq 0 ] || { echo "codex_machine does not accept arguments" >&2; return 1; }
+	with_sudo_session codex_machine_install
 }
 
 main(){
 	if [ $# = 0 ]; then
-		default_install
+		bootstrap
 		return
 	fi
 
 	local command=$1
 	shift
 	case "$command" in
-		default|install)
-			default_install "$@"
+		default|install|bootstrap)
+			bootstrap "$@"
 			;;
 		codex_machine|set_codex_machine)
-			set_codex_machine "$@"
+			bootstrap_codex_machine "$@"
 			;;
 		create_symlinks|create_shell_symlinks|create_claude_symlinks|create_codex_symlinks|set_zsh|set_mac|set_keyboard|set_cloud|set_claude|set_git|set_gpg|container)
 			"$command" "$@"
@@ -783,4 +937,6 @@ main(){
 	esac
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+	main "$@"
+fi
