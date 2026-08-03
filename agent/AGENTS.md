@@ -38,6 +38,7 @@ Shared principles (any runtime - Claude Code or Codex):
 - GUI/computer use never runs in the main loop - see Computer Use / GUI Automation for executor routing (codex-rescue for approval-seeded desktop apps, haiku/sonnet subagents otherwise)
 
 Claude Code:
+- Code-heavy reading (subsystem deep-dives, tracing logic across many files, digesting large diffs): when possible use a separate opus agent - spawn research/Explore/general-purpose with model: opus - instead of reading in the main loop, and consume only its report. Overrides the sonnet defaults below whenever the task is mostly reading code; sonnet remains for breadth-first locating and non-code research, haiku for purely mechanical scans
 - Exploration and codebase analysis: research agent (pinned sonnet)
 - Built-in agents (Explore, Plan, general-purpose) inherit the session model - pass model: sonnet explicitly for token-heavy sweeps (codebase mapping, bulk analysis, multi-location searches), haiku for purely mechanical scans. Applies when skills spawn them too (feature-dev's Explore step, review's extra general-purpose reviewers)
 - Implementation: hand well-specified, self-contained tasks to codex:codex-rescue proactively (write-capable) to conserve Claude quota - not only when stuck. Spawn the rescue wrapper as model: haiku - it only writes the handoff prompt, runs codex, and relays results. Keep work in the main loop or code-implementation (opus) when it needs session context or tight iteration
