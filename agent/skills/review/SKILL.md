@@ -32,9 +32,9 @@ Claude Code:
 
 Codex:
 
-- In Orca, create supervised Claude workers in the current worktree. Small targets use Fable. Substantial targets use an Opus evidence worker followed by a Fable verdict worker; add one scoped `codex exec --ephemeral --sandbox read-only` reviewer with delegation forbidden as the independent pass
-- Outside Orca, use bounded non-interactive Claude calls with explicit `opus` or `fable` model aliases when the Claude CLI is available. Pass the target directly and tell the worker not to invoke `/review`
-- If Claude cannot be launched, run the scoped Codex reviewer and label the verdict `Codex-only; Claude cross-check unavailable`
+- In Orca, load the `orchestration` skill and create supervised Claude workers in the current worktree. This is the managed cross-runtime path: small targets use Fable; substantial targets use an Opus evidence worker followed by a Fable verdict worker; add one scoped `codex exec --ephemeral --sandbox read-only` reviewer with delegation forbidden as the independent pass
+- Outside Orca, treat `claude -p --model opus` or `claude -p --model fable` only as a best-effort one-shot subprocess fallback. First confirm that the Claude CLI is installed and authenticated and that the Codex runtime permits child processes. Constrain it to read-only tools, pass the target directly, forbid `/review`, and label the result `Non-Orca Claude one-shot`; this is not a Codex-native agent or a Claude-model MCP bridge and has no supervised worker lifecycle. `claude mcp serve` exposes Claude Code tools to an MCP client but does not run Fable or Opus as a reviewer
+- If the one-shot prerequisites fail or the call does not complete, run the scoped Codex reviewer and label the verdict `Codex-only; Claude cross-check unavailable`
 
 All harnesses:
 

@@ -56,13 +56,13 @@ Claude Code:
 Codex:
 - Token-heavy sweeps and side tasks: scoped `codex exec` one-shots downshifted via `-m <cheaper model>` or `-c model_reasoning_effort=low|medium` instead of the main interactive thread
 - For an independent Codex review pass, use one scoped `codex exec --ephemeral --sandbox read-only` with a prompt that forbids delegation. Do not use `codex review --uncommitted` while the installed `review` skill auto-activates inside that command; it recursively launches more review processes in the current runtime
-- When Claude judgment is required from Codex, prefer supervised Orca Claude workers: Opus produces bounded code evidence and Fable makes the decision. Outside Orca, use a bounded non-interactive Claude call if available and label that fallback; if Claude is unavailable, use the scoped Codex-only review pass above and label it Codex-only
+- When Claude judgment is required from Codex, use supervised Orca Claude workers as the managed path: Opus produces bounded code evidence and Fable makes the decision. Outside Orca, `claude -p --model opus` or `claude -p --model fable` is only a best-effort one-shot subprocess fallback after confirming that the Claude CLI is installed and authenticated and that the Codex runtime permits child processes. Constrain the call to read-only tools and label the result `Non-Orca Claude one-shot`. It is not a Codex-native agent or a Claude-model MCP bridge and provides no Orca session visibility, lifecycle tracking, or result handoff; `claude mcp serve` exposes Claude Code tools to an MCP client but does not run Fable or Opus as a reviewer. If any prerequisite fails or the call does not complete, use the scoped Codex-only review pass above and label it Codex-only
 
 ### Review routing
 - Small, low-risk, single-concern change: Fable reviews directly. Add a Codex pass only when requested or when independence materially improves confidence
 - Large diffs, cross-subsystem changes, migrations, security, concurrency, persistence, release, or device-sensitive work: Opus first reads the code and produces source-anchored evidence; Fable then evaluates correctness and gives the final verdict; Codex supplies an independent adversarial pass
 - Review workers receive the target diff or exact file/range plus a bounded prompt. They must not invoke the shared `/review` skill from inside a review worker, which would recursively dispatch more reviewers
-- Report which model roles actually ran. Never imply a Claude cross-check happened when the harness could not launch Claude
+- Report which model roles actually ran. Never imply a Claude cross-check happened when the harness could not launch Claude or the call did not complete
 
 ### Real-device validation routing
 - Fable defines the scenario, acceptance criteria, and final pass/fail judgment. Opus traces the implementation and identifies observability points before device work when substantial code reading is needed
