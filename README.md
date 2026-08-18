@@ -38,6 +38,12 @@ Personal dotfiles and shared agent configuration for local development machines.
 
 `create_codex_symlinks` links managed shared skills individually into `~/.codex/skills` and copies managed pets into `~/.codex/pets` so Codex-installed runtime skills, non-managed symlinks, and non-managed pet directories remain in place.
 
+## Agent runtime boundaries
+
+`agent/AGENTS.md` and `agent/skills/` contain the portable cross-harness routing policy. `claude/settings.json` contains the intentional Claude Code baseline and is linked into `~/.claude`; Claude Code and Orca may append machine-local UI, hook, and status-line state to that linked file. Preserve those live additions when reconciling checkouts, but do not commit Orca `agent-hooks` commands, `statusLine`, or machine-specific UI state.
+
+Codex model selection, reasoning effort, MCP servers, connectors, approvals, sessions, and plugin caches remain host-local under `~/.codex`. Shared policy refers to the configured Codex default instead of pinning a model name that the repository does not control.
+
 ## Shell prompt and navigation
 
 `set_zsh` installs [Starship](https://starship.rs/) and [zoxide](https://github.com/ajeetdsouza/zoxide). The tracked Starship configuration is linked to `~/.config/starship.toml` during `create_symlinks`.
