@@ -39,7 +39,7 @@ Shared principles (any runtime - Claude Code or Codex):
 - GUI/computer use never runs in the main loop - see Computer Use / GUI Automation for executor routing (a separate Orca Codex worker for approval-seeded desktop and device work, haiku/sonnet subagents otherwise)
 
 Orca cross-runtime sessions:
-- Treat any `ORCA_*` worktree or terminal context (for example `ORCA_WORKTREE_ID` or `ORCA_TERMINAL_HANDLE`) as an Orca session; do not gate routing on `ORCA_WORKSPACE_ID`, which is not present in every Orca terminal
+- Treat any `ORCA_*` worktree or terminal context (for example `ORCA_WORKTREE_ID` or `ORCA_TERMINAL_HANDLE`) as an Orca session; do not gate routing on `ORCA_WORKSPACE_ID`, which is not present in every Orca terminal. When no `ORCA_*` variable reaches the agent shell, use a successful `orca worktree current --json` lookup as the fallback signal that the current directory is an Orca-managed worktree
 - When an independent task benefits from a full separate Claude Code or Codex session, use Orca's native current-worktree terminal and orchestration support. This creates a visible session with separate conversation context while sharing the checkout
 - For a visible unsupervised companion, run `orca terminal create --worktree active --title "CLAUDE: <task>" --command "ORCA_COMPANION=1 claude" --json` or the equivalent `CODEX` / `codex` command. For result-returning work, load the `orchestration` skill and use a supervised worker instead
 - Do not describe an in-process subagent, `claude -p`, or `codex exec` one-shot as a separate Orca session. Use those for bounded delegation; use an Orca worker when the user asks for, or the task benefits from, an independently visible session

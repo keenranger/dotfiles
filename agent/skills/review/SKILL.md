@@ -21,19 +21,34 @@ Resolve a bare #N with `gh pr view N`, falling back to `gh issue view N`. An exp
 - Substantial: a large diff, multiple subsystems, or any high-risk category above. Diff size is only a heuristic; risk and subsystem breadth decide the route
 - Fetch the target once. For a PR, pass the fetched patch to every reviewer instead of assuming the PR branch is checked out. Give each worker the exact diff, files, range, and question it needs
 
-## 3. Dispatch by harness
+## 3. Select roles, then dispatch by harness and Orca context
 
-Claude Code:
+Select Claude roles from risk before choosing the execution mechanism:
 
-- Small LOCAL/PR: git-diff-reviewer with `model: fable`
-- Substantial LOCAL/PR: an Opus research/general-purpose pass for source-anchored code evidence, then git-diff-reviewer with `model: fable` for the verdict, plus codex:codex-rescue for an independent adversarial pass
-- ISSUE: pr-issue-reviewer with `model: fable`; add an Opus code-reading pass when feasibility depends on tracing substantial existing code
-- codex:codex-rescue uses the Codex CLI's configured default. Never pin a Codex model name in this shared skill
+- Small LOCAL/PR: use a Fable verdict worker
+- Substantial LOCAL/PR: use an Opus evidence worker for source-anchored code reading, then a Fable verdict worker
+- ISSUE: use a Fable verdict worker; add an Opus evidence worker when feasibility depends on tracing substantial existing code
 
-Codex:
+Treat any `ORCA_*` worktree or terminal context, including `ORCA_WORKTREE_ID` or `ORCA_TERMINAL_HANDLE`, as Orca. Do not gate this decision only on `ORCA_WORKSPACE_ID`. When no `ORCA_*` variable reaches the agent shell, use a successful `orca worktree current --json` lookup as the fallback signal that the current directory is an Orca-managed worktree.
 
-- In Orca, load the `orchestration` skill and create supervised Claude workers in the current worktree. This is the managed cross-runtime path: small targets use Fable; substantial targets use an Opus evidence worker followed by a Fable verdict worker; add one scoped `codex exec --ephemeral --sandbox read-only` reviewer with delegation forbidden as the independent pass
-- Outside Orca, treat `claude -p --model opus` or `claude -p --model fable` only as a best-effort one-shot subprocess fallback. First confirm that the Claude CLI is installed and authenticated and that the Codex runtime permits child processes. Constrain it to read-only tools, pass the target directly, forbid `/review`, and label the result `Non-Orca Claude one-shot`; this is not a Codex-native agent or a Claude-model MCP bridge and has no supervised worker lifecycle. `claude mcp serve` exposes Claude Code tools to an MCP client but does not run Fable or Opus as a reviewer
+### Claude Code in Orca
+
+- Run Fable and Opus roles as native Claude agents: git-diff-reviewer or pr-issue-reviewer with `model: fable`, and research/general-purpose with `model: opus`
+- When an independent Codex pass is required, load the `orchestration` skill and dispatch a supervised Orca Codex worker in the current worktree. Put these constraints in the worker task specification: direct review only, read-only, do not load or invoke the shared review skill, and no delegation. Do not use codex:codex-rescue for this Orca-managed pass
+
+### Claude Code outside Orca
+
+- Run Fable and Opus roles as the same native Claude agents
+- When an independent Codex pass is required, use codex:codex-rescue. It uses the Codex CLI's configured default; never pin a Codex model name in this shared skill
+
+### Codex in Orca
+
+- Use the managed cross-runtime path: load the `orchestration` skill and dispatch supervised Orca Claude workers in the current worktree. Start the evidence worker with `worker-start --agent claude --model opus`, wait for its bounded evidence, then pass that evidence to the verdict worker started with `worker-start --agent claude --model fable`. Put these constraints in both worker task specifications: direct review only, read-only, do not load or invoke the shared review skill, and no delegation
+- When an independent Codex pass is required, add one scoped `codex exec --ephemeral --sandbox read-only` reviewer with delegation forbidden
+
+### Codex outside Orca
+
+- Treat `claude -p --model opus` or `claude -p --model fable` only as a best-effort one-shot subprocess fallback for the selected Claude roles. First confirm that the Claude CLI is installed and authenticated and that the Codex runtime permits child processes. Constrain it to read-only tools, pass the target directly, forbid `/review`, and label the result `Non-Orca Claude one-shot`; this is not a Codex-native agent or a Claude-model MCP bridge and has no supervised worker lifecycle. `claude mcp serve` exposes Claude Code tools to an MCP client but does not run Fable or Opus as a reviewer
 - If the one-shot prerequisites fail or the call does not complete, run the scoped Codex reviewer and label the verdict `Codex-only; Claude cross-check unavailable`
 
 All harnesses:
