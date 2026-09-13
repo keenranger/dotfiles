@@ -371,6 +371,7 @@ set_codex_machine(){
 	set_zsh
 	create_symlinks
 	set_claude
+	set_codex
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		brew_install_casks "${DARWIN_CODEX_MACHINE_CASKS[@]}"
 		brew_install terminal-notifier
@@ -427,12 +428,21 @@ set_cloud(){
 }
 
 set_claude(){
-	if command -v claude &> /dev/null; then
-		echo "Claude Code already installed, skipping"
+	if [ -x "$HOME/.local/bin/claude" ]; then
+		echo "Standalone Claude Code already installed, skipping"
 		return 0
 	fi
 	echo "Installing Claude Code..."
 	curl -fsSL https://claude.ai/install.sh | bash
+}
+
+set_codex(){
+	if [ -x "$HOME/.local/bin/codex" ]; then
+		echo "Standalone Codex CLI already installed, skipping"
+		return 0
+	fi
+	echo "Installing Codex CLI..."
+	curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh
 }
 
 set_git(){
@@ -739,6 +749,7 @@ Commands:
   set_keyboard
   set_cloud
   set_claude
+  set_codex
   set_git
   set_gpg [export|import FILE]
   set_codex_machine
@@ -751,6 +762,7 @@ default_install(){
 	set_git
 	create_symlinks
 	set_claude
+	set_codex
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		set_mac
 	fi
@@ -771,7 +783,7 @@ main(){
 		codex_machine|set_codex_machine)
 			set_codex_machine "$@"
 			;;
-		create_symlinks|create_shell_symlinks|create_claude_symlinks|create_codex_symlinks|set_zsh|set_mac|set_keyboard|set_cloud|set_claude|set_git|set_gpg|container)
+		create_symlinks|create_shell_symlinks|create_claude_symlinks|create_codex_symlinks|set_zsh|set_mac|set_keyboard|set_cloud|set_claude|set_codex|set_git|set_gpg|container)
 			"$command" "$@"
 			;;
 		help|-h|--help)
