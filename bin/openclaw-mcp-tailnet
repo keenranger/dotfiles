@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Host-local settings; never print credentials or write protocol chatter to stdout.
+set -euo pipefail
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/openclaw-mcp"
+url="${OPENCLAW_MCP_URL:-}"
+if [[ -z "$url" && -r "$config_dir/gateway-url" ]]; then
+  IFS= read -r url < "$config_dir/gateway-url" || true
+fi
+token_file="${OPENCLAW_MCP_TOKEN_FILE:-$config_dir/gateway.token}"
+if [[ ! "$url" =~ ^wss://[a-zA-Z0-9.-]+\.ts\.net(:[0-9]+)?/?$ ]]; then
+  echo 'Set OPENCLAW_MCP_URL or ~/.config/openclaw-mcp/gateway-url to wss://<host>.<tailnet>.ts.net[:port]' >&2
+  exit 2
+fi
+if [[ ! -s "$token_file" || ! -r "$token_file" ]]; then
+  echo 'Provision a readable, nonempty Gateway token file locally (chmod 600); never commit it.' >&2
+  exit 2
+fi
+command -v openclaw >/dev/null || { echo 'Install the OpenClaw CLI on this client first.' >&2; exit 127; }
+exec openclaw mcp serve --url "$url" --token-file "$token_file" --claude-channel-mode off "$@"
