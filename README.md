@@ -54,3 +54,7 @@ Codex model selection, reasoning effort, MCP servers, connectors, approvals, ses
 `set_gpg backup` exports secret keys, public keys, owner trust, and revocation certificates in portable GnuPG formats, then encrypts the archive with AES256. Interactive backups ask for the existing GPG key passphrase twice and use that same passphrase to unlock every protected source key and encrypt the archive. All secret keys must share that passphrase; the backup fails instead of creating an incomplete archive when one does not. The recovery flow does not depend on a machine-local Keychain item. `GPG_BACKUP_PASSPHRASE` remains available for non-interactive automation.
 
 `set_gpg restore` verifies the sibling `.sha256` file when present, decrypts the archive, and imports it into the current `GNUPGHOME`. It does not restore machine-specific GnuPG configuration or absolute symlinks. Backups created with the older `gnupg-home-v1` format remain supported.
+
+## Optional OpenClaw MCP over Tailscale
+
+See [cross-machine MCP setup](docs/openclaw-mcp.md). The tracked launcher is reusable; client registrations, Gateway URL, credentials, and pairing stay host-local.
