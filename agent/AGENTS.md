@@ -6,6 +6,12 @@
 - Prefer native tool behavior over custom scripts
 - When extending libraries, inherit and override only what's needed
 
+## Accessibility
+- Build products that people with disabilities can fully enjoy. Consider their different ways of using the product from the start, so disability does not become a barrier to the experience.
+- Make accessibility part of everyday design, not a final inspection to pass. Care for the details that let people share the same rich experience, rather than offering a separate, reduced version.
+- Support different ways of perceiving and interacting while preserving meaning, context, and useful choices across the experience.
+- Use assistive technology and, when possible, feedback from people who rely on it to find and remove barriers in real use. Let verification support this care, not replace it with a checklist.
+
 ## Scope and Context
 - Cross-cutting changes (field renames, API updates): always check test files, shell scripts, docs, and all consuming code for missed references
 - When scope is ambiguous, confirm the specific target (issue ID, branch, directory) before starting work
