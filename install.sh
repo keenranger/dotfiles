@@ -12,6 +12,7 @@ COMMON_BREW_PACKAGES=(
 	zoxide
 	ripgrep
 	bat
+	jq
 	gh
 	neovim
 	tmux
@@ -464,7 +465,7 @@ set_zsh(){
 
 set_mac(){
 	ensure_homebrew
-	brew_install_casks "${DARWIN_APP_CASKS[@]}"
+	brew_install_casks "${DARWIN_APP_CASKS[@]}" || echo "Some casks failed to install; rerun ./install.sh set_mac later" >&2
 	brew_install terminal-notifier
 	set_keyboard
 }
@@ -472,10 +473,10 @@ set_mac(){
 set_codex_machine(){
 	set_zsh
 	create_symlinks
-	set_claude
-	set_codex
+	set_claude || echo "Claude Code install failed; rerun ./install.sh set_claude later" >&2
+	set_codex || echo "Codex CLI install failed; rerun ./install.sh set_codex later" >&2
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
-		brew_install_casks "${DARWIN_CODEX_MACHINE_CASKS[@]}"
+		brew_install_casks "${DARWIN_CODEX_MACHINE_CASKS[@]}" || echo "Some casks failed to install; rerun ./install.sh set_codex_machine later" >&2
 		brew_install terminal-notifier
 	fi
 }
@@ -503,7 +504,7 @@ set_keyboard(){
 	/usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:61:value:parameters:2 integer 8388608" "$PLIST"
 
 	# Apply changes instantly
-	killall cfprefsd 2>/dev/null
+	killall cfprefsd 2>/dev/null || true
 	/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 
 	echo "F18 shortcut configured for input source switching."
@@ -530,8 +531,8 @@ set_cloud(){
 }
 
 set_claude(){
-	if [ -x "$HOME/.local/bin/claude" ]; then
-		echo "Standalone Claude Code already installed, skipping"
+	if [ -x "$HOME/.local/bin/claude" ] || command -v claude &> /dev/null; then
+		echo "Claude Code already installed, skipping"
 		return 0
 	fi
 	echo "Installing Claude Code..."
@@ -821,7 +822,7 @@ container(){
 	if [[ "$(uname)" = "Darwin" ]]; then
 		# macOS installation
 		brew_install "${DARWIN_CONTAINER_BREW_PACKAGES[@]}"
-		podman machine init
+		podman machine inspect >/dev/null 2>&1 || podman machine init
 		podman machine start
 	else
 		# Linux installation
@@ -880,8 +881,8 @@ personal_install(){
 	if [ -n "$gpg_backup" ]; then
 		set_gpg restore "$gpg_backup"
 	fi
-	set_claude
-	set_codex
+	set_claude || echo "Claude Code install failed; rerun ./install.sh set_claude later" >&2
+	set_codex || echo "Codex CLI install failed; rerun ./install.sh set_codex later" >&2
 	if [[ "$CHECK_OS" = "Darwin" ]]; then
 		set_mac
 	fi

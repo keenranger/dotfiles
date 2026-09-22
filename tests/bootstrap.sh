@@ -61,6 +61,10 @@ set_claude(){
 	echo "set_claude" >> "$log_file"
 }
 
+set_codex(){
+	echo "set_codex" >> "$log_file"
+}
+
 set_mac(){
 	echo "set_mac" >> "$log_file"
 }
@@ -90,11 +94,32 @@ set_git
 create_symlinks
 set_gpg restore $test_root/keys.tar.gz.gpg
 set_claude
+set_codex
 set_mac
 EOF
 )
 actual_order=$(grep -E '^(set_|create_)' "$log_file")
 [ "$actual_order" = "$expected_order" ]
+
+set_codex(){
+	echo "set_codex" >> "$log_file"
+	return 1
+}
+
+: > "$log_file"
+(
+	PATH="$test_root/bin:$PATH" HOME="$test_root/home" CHECK_OS=Darwin \
+		main bootstrap
+) >> "$log_file" 2>&1
+grep -q '^set_codex$' "$log_file"
+if ! grep -q '^set_mac$' "$log_file"; then
+	echo "A failed CLI install aborted the rest of the bootstrap" >&2
+	exit 1
+fi
+
+set_codex(){
+	echo "set_codex" >> "$log_file"
+}
 
 fail_bootstrap(){
 	return 23
