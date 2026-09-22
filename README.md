@@ -8,6 +8,7 @@ Personal dotfiles and shared agent configuration for local development machines.
 - `agent/skills/`: shared workflow skills.
 - `codex/pets/`: managed Codex pet packages.
 - `claude/`: Claude Code-specific settings, hooks, and agents.
+- `config/starship.toml`: shared Starship prompt configuration.
 - `install.sh`: modular setup, symlink, and managed artifact installer.
 
 ## Common Commands
@@ -45,6 +46,19 @@ If `/Applications/ChatGPT.app` already exists, the installer skips its Homebrew 
 When a dotfile destination already contains a real file, directory, or different symlink, the installer moves it into a dated directory under `~/.dotfiles-backups/` before creating the managed symlink. Re-running against an already-correct managed symlink leaves it unchanged.
 
 `create_codex_symlinks` links managed shared skills individually into `~/.codex/skills` and copies managed pets into `~/.codex/pets` so Codex-installed runtime skills, non-managed symlinks, and non-managed pet directories remain in place.
+
+## Agent runtime boundaries
+
+`agent/AGENTS.md` and `agent/skills/` contain the portable cross-harness routing policy. `claude/settings.json` contains the intentional Claude Code baseline and is linked into `~/.claude`; Claude Code and Orca may append machine-local UI, hook, and status-line state to that linked file. Preserve those live additions when reconciling checkouts, but do not commit Orca `agent-hooks` commands, `statusLine`, or machine-specific UI state.
+
+Codex model selection, reasoning effort, MCP servers, connectors, approvals, sessions, and plugin caches remain host-local under `~/.codex`. Shared policy refers to the configured Codex default instead of pinning a model name that the repository does not control.
+
+## Shell prompt and navigation
+
+`set_zsh` installs [Starship](https://starship.rs/) and [zoxide](https://github.com/ajeetdsouza/zoxide). The tracked Starship configuration is linked to `~/.config/starship.toml` during `create_symlinks`.
+
+- `z <query>` jumps to the highest-ranked matching directory.
+- `zi <query>` selects a matching directory interactively with fzf.
 
 `set_gpg backup` exports secret keys, public keys, owner trust, and revocation certificates in portable GnuPG formats, then encrypts the archive with AES256. Interactive backups ask for the existing GPG key passphrase twice and use that same passphrase to unlock every protected source key and encrypt the archive. All secret keys must share that passphrase; the backup fails instead of creating an incomplete archive when one does not. The recovery flow does not depend on a machine-local Keychain item. `GPG_BACKUP_PASSPHRASE` remains available for non-interactive automation.
 

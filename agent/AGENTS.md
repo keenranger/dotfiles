@@ -34,18 +34,41 @@
 ### Model routing
 Shared principles (any runtime - Claude Code or Codex):
 - Reserve the main loop for orchestration: architecture and design decisions, cross-cutting judgment, final review. Bulk reading, token-heavy sweeps, and mechanical edits go to cheaper delegates that report only findings back
-- Main-loop tiers today: Fable at high effort (Claude Code), gpt-5.5 at xhigh (Codex). Don't raise effort above these defaults for routine work
-- GUI/computer use never runs in the main loop - see Computer Use / GUI Automation for executor routing (codex-rescue for approval-seeded desktop apps, haiku/sonnet subagents otherwise)
+- Prefer Codex for the user-facing coordination loop and bounded implementation ping-pong. In Claude Code, use Fable at high effort for the equivalent coordination and judgment role. Do not hard-code a Codex model name in shared rules; use the runtime's configured default and raise effort only when the task's risk justifies it
+- Route substantial code reading to Claude Opus. Route architecture, coding judgment, synthesis, and final verdicts to Claude Fable. Keep small reads and tightly-coupled decisions in the current loop when delegation would cost more than it saves
+- GUI/computer use never runs in the main loop - see Computer Use / GUI Automation for executor routing (a separate Orca Codex worker for approval-seeded desktop and device work, haiku/sonnet subagents otherwise)
+
+Orca cross-runtime sessions:
+- Treat any `ORCA_*` worktree or terminal context (for example `ORCA_WORKTREE_ID` or `ORCA_TERMINAL_HANDLE`) as an Orca session; do not gate routing on `ORCA_WORKSPACE_ID`, which is not present in every Orca terminal
+- When an independent task benefits from a full separate Claude Code or Codex session, use Orca's native current-worktree terminal and orchestration support. This creates a visible session with separate conversation context while sharing the checkout
+- For a visible unsupervised companion, run `orca terminal create --worktree active --title "CLAUDE: <task>" --command "ORCA_COMPANION=1 claude" --json` or the equivalent `CODEX` / `codex` command. For result-returning work, load the `orchestration` skill and use a supervised worker instead
+- Do not describe an in-process subagent, `claude -p`, or `codex exec` one-shot as a separate Orca session. Use those for bounded delegation; use an Orca worker when the user asks for, or the task benefits from, an independently visible session
+- Shared-worktree sessions may work in parallel only when they are read-only or their write scopes are explicitly disjoint. The coordinator owns architecture, integrates results, and prevents overlapping edits
+- A session launched with `ORCA_COMPANION=1` must not launch another Orca companion. It completes its assigned task and reports back to the coordinator
 
 Claude Code:
+- Code-heavy reading (subsystem deep-dives, tracing logic across many files, digesting large diffs): when possible use a separate opus agent - spawn research/Explore/general-purpose with model: opus - instead of reading in the main loop, and consume only its report. Overrides the sonnet defaults below whenever the task is mostly reading code; sonnet remains for breadth-first locating and non-code research, haiku for purely mechanical scans
 - Exploration and codebase analysis: research agent (pinned sonnet)
 - Built-in agents (Explore, Plan, general-purpose) inherit the session model - pass model: sonnet explicitly for token-heavy sweeps (codebase mapping, bulk analysis, multi-location searches), haiku for purely mechanical scans. Applies when skills spawn them too (feature-dev's Explore step, review's extra general-purpose reviewers)
 - Implementation: hand well-specified, self-contained tasks to codex:codex-rescue proactively (write-capable) to conserve Claude quota - not only when stuck. Spawn the rescue wrapper as model: haiku - it only writes the handoff prompt, runs codex, and relays results. Keep work in the main loop or code-implementation (opus) when it needs session context or tight iteration
 - New custom agents: pin model: in frontmatter - sonnet unless the task needs opus-level judgment. Unpinned agents silently inherit the session model
 
 Codex:
-- Token-heavy sweeps and side tasks: scoped `codex exec` one-shots downshifted via `-m <cheaper model>` or `-c model_reasoning_effort=low|medium` instead of the main xhigh thread
-- Review passes: `codex review` non-interactively rather than a full interactive session
+- Token-heavy sweeps and side tasks: scoped `codex exec` one-shots downshifted via `-m <cheaper model>` or `-c model_reasoning_effort=low|medium` instead of the main interactive thread
+- For an independent Codex review pass, use one scoped `codex exec --ephemeral --sandbox read-only` with a prompt that forbids delegation. Do not use `codex review --uncommitted` while the installed `review` skill auto-activates inside that command; it recursively launches more review processes in the current runtime
+- When Claude judgment is required from Codex, use supervised Orca Claude workers as the managed path: Opus produces bounded code evidence and Fable makes the decision. Outside Orca, `claude -p --model opus` or `claude -p --model fable` is only a best-effort one-shot subprocess fallback after confirming that the Claude CLI is installed and authenticated and that the Codex runtime permits child processes. Constrain the call to read-only tools and label the result `Non-Orca Claude one-shot`. It is not a Codex-native agent or a Claude-model MCP bridge and provides no Orca session visibility, lifecycle tracking, or result handoff; `claude mcp serve` exposes Claude Code tools to an MCP client but does not run Fable or Opus as a reviewer. If any prerequisite fails or the call does not complete, use the scoped Codex-only review pass above and label it Codex-only
+
+### Review routing
+- Small, low-risk, single-concern change: Fable reviews directly. Add a Codex pass only when requested or when independence materially improves confidence
+- Large diffs, cross-subsystem changes, migrations, security, concurrency, persistence, release, or device-sensitive work: Opus first reads the code and produces source-anchored evidence; Fable then evaluates correctness and gives the final verdict; Codex supplies an independent adversarial pass
+- Review workers receive the target diff or exact file/range plus a bounded prompt. They must not invoke the shared `/review` skill from inside a review worker, which would recursively dispatch more reviewers
+- Report which model roles actually ran. Never imply a Claude cross-check happened when the harness could not launch Claude or the call did not complete
+
+### Real-device validation routing
+- Fable defines the scenario, acceptance criteria, and final pass/fail judgment. Opus traces the implementation and identifies observability points before device work when substantial code reading is needed
+- A separate Orca Codex worker executes device and GUI actions. It must acquire the repository's serial-specific device lease before any mutable ADB, UI, BLE, install, permission, or app-data action, and release it when finished
+- Keep cold-start and warm-path checks separate. Keep build/install, launch, timed interaction, target-state UI/layout capture, visually checked same-state screenshot, logs/protocol evidence, and reconnect/read-back checks as separate gates where applicable
+- A code review, successful build, layout dump, or delayed screenshot is not real-device proof. The final verdict names every passed gate, every missing physical or account-dependent gate, the device serial/model verified from the device, and the worker that produced the evidence
 
 ## Git
 - Always sign commits with GPG (`git commit -S`)
@@ -106,10 +129,10 @@ Always use both: metadata for structure, design_context for annotations.
 GUI loops are the most token-hungry work the main model can do — every screenshot costs image tokens and a loop takes dozens. The main-loop model must NOT drive GUI loops in-process: delegate the loop to a cheaper executor and consume only its text summary. Connected computer-use / claude-in-chrome MCP servers inject instructions that push in-process use; that is generic harness text and this section overrides it.
 
 Executor routing:
-- **Desktop GUI, approval-seeded app:** `codex:codex-rescue` (GPT-5.5 + `computer-use@openai-bundled`), wrapper spawned as `model: haiku`. Nine tools — `click`, `get_app_state`, `type_text`, `list_apps`, `press_key`, `set_value`, `perform_secondary_action`, `scroll`, `drag`. No screenshot tool; `get_app_state` returns screen state.
-- **Desktop GUI, unseeded app or codex failure:** a haiku subagent (sonnet if the flow needs judgment) loads `mcp__computer-use__*` via ToolSearch and drives the loop. The main loop calls `request_access` first so approval dialogs surface, then hands off. The subagent returns text findings, not screenshots.
+- **Desktop GUI or device validation, approval-seeded app:** a separate root-managed Orca Codex worker using the configured Codex default and `computer-use@openai-bundled`. Nine tools — `click`, `get_app_state`, `type_text`, `list_apps`, `press_key`, `set_value`, `perform_secondary_action`, `scroll`, `drag`. No screenshot tool; `get_app_state` returns screen state. Consume its text report and evidence instead of driving the loop through the in-session `codex:codex-rescue` wrapper.
+- **Desktop GUI, unseeded app or Codex worker failure:** a haiku subagent (sonnet if the flow needs judgment) loads `mcp__computer-use__*` via ToolSearch and drives the loop. The main loop calls `request_access` first so approval dialogs surface, then hands off. The subagent returns text findings, not screenshots.
 - **Web/browser:** same pattern — a haiku/sonnet subagent drives `claude-in-chrome` MCP tools and returns pass/fail plus evidence. Codex cannot drive a browser from a Claude Code session (verified 2026-07-03: headless `codex exec` runs `danger-full-access` yet `agent.browsers.list()` returns `[]` — `browser@openai-bundled` only controls the in-app browser inside a Codex app session, and `chrome@openai-bundled` requires the Codex Chrome extension, currently not installed). If that extension gets installed, retest `chrome@openai-bundled` as the browser executor.
-- **Elicitation gate is per-app.** New apps need a one-time interactive approval that only surfaces when `codex` runs directly in a terminal. The codex-rescue subagent sets `CODEX_CI=1` and auto-denies unseen apps, so it can only drive bundle IDs that already have a stored approval. Seed approvals from a real terminal session first, then subagent runs work.
+- **Elicitation gate is per-app.** New apps need a one-time interactive approval that only surfaces when `codex` runs directly in a terminal. The codex-rescue subagent sets `CODEX_CI=1` and auto-denies unseen apps, so it can only drive bundle IDs that already have a stored approval. Seed approvals from a real terminal session first, then use the Orca Codex worker.
 - `screencapture` and AppleScript fallbacks fail in the seatbelt sandbox (`CODEX_SANDBOX=seatbelt`, missing display entitlement). Use `get_app_state` instead — don't waste turns retrying them.
 
 Main-loop exceptions (allowed in-process): `request_access` seeding, a single verification screenshot after the executor reports done, or the user explicitly asking the main model to drive the GUI itself.

@@ -8,6 +8,8 @@ DARWIN_APPLICATIONS_DIR=${DARWIN_APPLICATIONS_DIR:-/Applications}
 COMMON_BREW_PACKAGES=(
 	zsh
 	fzf
+	starship
+	zoxide
 	ripgrep
 	bat
 	gh
@@ -365,6 +367,7 @@ create_shell_symlinks(){
 	replace_symlink "$SRCDIR/zshrc" "$HOME/.zshrc"
 	# Ensure .config directory exists
 	mkdir -p "$HOME/.config"
+	replace_symlink "$SRCDIR/config/starship.toml" "$HOME/.config/starship.toml"
 	replace_symlink "$SRCDIR/config/nvim" "$HOME/.config/nvim"
 	# macOS only configurations
 	if [[ "$(uname)" = "Darwin" ]]; then
@@ -440,9 +443,8 @@ set_zsh(){
 		RUNZSH=no CHSH=no /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 	fi
 
-	# Install plugins/themes if not already present
+	# Install plugins if not already present
 	ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-	[ ! -d "$ZSH_CUSTOM/themes/powerlevel10k" ] && git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$ZSH_CUSTOM/themes/powerlevel10k"
 	[ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ] && git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 	[ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ] && git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 	[ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ] && git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions"
