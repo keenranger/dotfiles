@@ -437,8 +437,8 @@ set_claude(){
 }
 
 set_codex(){
-	if [ -x "$HOME/.local/bin/codex" ]; then
-		echo "Standalone Codex CLI already installed, skipping"
+	if [ -x "$HOME/.local/bin/codex" ] || command -v codex &> /dev/null; then
+		echo "Codex CLI already installed, skipping"
 		return 0
 	fi
 	echo "Installing Codex CLI..."

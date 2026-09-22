@@ -26,15 +26,15 @@ esac
 EOF
 chmod +x "$test_root/bin/curl"
 
-HOME="$test_root/home" PATH="$test_root/bin:$PATH" "$repo_dir/install.sh" set_claude
-HOME="$test_root/home" PATH="$test_root/bin:$PATH" "$repo_dir/install.sh" set_codex
+HOME="$test_root/home" PATH="$test_root/bin:/usr/bin:/bin" "$repo_dir/install.sh" set_claude
+HOME="$test_root/home" PATH="$test_root/bin:/usr/bin:/bin" "$repo_dir/install.sh" set_codex
 
 [ -x "$test_root/home/.local/bin/claude" ]
 [ -x "$test_root/home/.local/bin/codex" ]
 [ "$(wc -l < "$test_root/home/curl-calls" | tr -d ' ')" = 2 ]
 
-HOME="$test_root/home" PATH="$test_root/bin:$PATH" "$repo_dir/install.sh" set_claude
-HOME="$test_root/home" PATH="$test_root/bin:$PATH" "$repo_dir/install.sh" set_codex
+HOME="$test_root/home" PATH="$test_root/bin:/usr/bin:/bin" "$repo_dir/install.sh" set_claude
+HOME="$test_root/home" PATH="$test_root/bin:/usr/bin:/bin" "$repo_dir/install.sh" set_codex
 
 [ "$(wc -l < "$test_root/home/curl-calls" | tr -d ' ')" = 2 ]
 
