@@ -8,7 +8,11 @@ Personal dotfiles and shared agent configuration for local development machines.
 - `agent/skills/`: shared workflow skills.
 - `codex/pets/`: managed Codex pet packages.
 - `claude/`: Claude Code-specific settings, hooks, and agents.
-- `config/starship.toml`: shared Starship prompt configuration.
+- `config/`: Starship, Neovim, and Karabiner configuration.
+- `gnupg/`: portable GnuPG agent and common configuration.
+- `bin/`: reusable launchers such as the OpenClaw MCP tailnet bridge.
+- `docs/`: setup guides for optional integrations.
+- `tests/`: shell tests for the installer and routing configuration.
 - `install.sh`: modular setup, symlink, and managed artifact installer.
 
 ## Common Commands
@@ -39,7 +43,7 @@ Personal dotfiles and shared agent configuration for local development machines.
 ./install.sh set_gpg restore /path/to/gpg-secret-keys-YYYYMMDDTHHMMSSZ.tar.gz.gpg
 ```
 
-Both full-machine profiles validate administrator access once with `sudo -v`, keep that timestamp alive only while the bootstrap process runs, and use non-interactive `sudo -n` for later privileged steps. The personal profile runs in this order: shell and tooling, global Git identity, dotfile symlinks, optional GPG restore, Claude Code and macOS apps including ChatGPT, then a short list of remaining sign-in and macOS permission steps. The GPG backup passphrase remains a separate prompt. Existing individual setup commands remain available for interactive use.
+Both full-machine profiles validate administrator access once with `sudo -v`, keep that timestamp alive only while the bootstrap process runs, and use non-interactive `sudo -n` for later privileged steps. The personal profile runs in this order: shell and tooling, global Git identity, dotfile symlinks, optional GPG restore, Claude Code, Codex CLI, and macOS apps including ChatGPT, then a short list of remaining sign-in and macOS permission steps. The GPG backup passphrase remains a separate prompt. Existing individual setup commands remain available for interactive use.
 
 If `/Applications/ChatGPT.app` already exists, the installer skips its Homebrew cask and continues installing the other apps independently.
 
