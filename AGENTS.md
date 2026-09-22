@@ -64,7 +64,7 @@ Tool-specific configuration stays under the tool directory:
 
 ## Tests
 
-Shell tests under `tests/` stub the network and privileged commands and run against the repository `install.sh`:
+Shell tests under `tests/` run against the repository `install.sh` with the privileged and installer commands they cover replaced by stubs:
 
 ```bash
 bash tests/bootstrap.sh
@@ -73,7 +73,11 @@ bash tests/routing-config.sh
 bash tests/standalone-clis.sh
 ```
 
-Run `bash -n install.sh tests/*.sh` and the relevant suites before opening a pull request that touches `install.sh`, `claude/settings.json`, or `agent/AGENTS.md`.
+Before opening a pull request that touches `install.sh`, `claude/settings.json`, or `agent/AGENTS.md`, syntax-check each shell file separately (`bash -n` only checks its first argument) and run the relevant suites:
+
+```bash
+for f in install.sh tests/*.sh; do bash -n "$f"; done
+```
 
 ## Install Strategy
 
