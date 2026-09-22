@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# /// script
+# dependencies = ["pyyaml"]
+# ///
 """Validate JSON and YAML config files before git commit."""
 
 import json
