@@ -1,7 +1,7 @@
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$HOME/.local/bin:$PATH
 # Path to your oh-my-zsh installation.
-export ZSH="/$HOME/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 # Brew configuration
 # Set PATH, MANPATH, etc., for Homebrew.
 if [ "$(uname)" = "Linux" ]; then
@@ -51,6 +51,9 @@ zsh-autosuggestions
 )
 
 
+# zsh-completions is cloned by install.sh; it must be on fpath before compinit.
+fpath+="${ZSH_CUSTOM:-$ZSH/custom}/plugins/zsh-completions/src"
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -73,9 +76,6 @@ export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
 export TERM=xterm-256color
-
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.3.2/bin/terraform terraform
 
 # gpg
 export GPG_TTY=$TTY
@@ -133,6 +133,8 @@ if [[ -d "$ANDROID_HOME" ]]; then
 fi
 
 # Connect to Android emulator running on Windows (WSL2 only)
+cc() { command claude "$@"; }
+
 adb-connect-windows() {
     if [[ "$(uname)" == "Linux" ]] && grep -qi microsoft /proc/version 2>/dev/null; then
         local windows_ip=$(awk '/nameserver/ {print $2}' /etc/resolv.conf)
@@ -142,8 +144,6 @@ adb-connect-windows() {
         echo "Not running in WSL2"
     fi
 }
-
-cc() { command claude "$@"; }
 
 # Claude Desktop runs WorktreeCreate hooks only when the repo folder itself has
 # accepted the trust dialog (projects.<dir>.hasTrustDialogAccepted in
@@ -201,7 +201,7 @@ gh() {
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 # Added by Antigravity
-export PATH="/Users/mark/.antigravity/antigravity/bin:$PATH"
+[ -d "$HOME/.antigravity/antigravity/bin" ] && export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 export PATH="/opt/homebrew/opt/ffmpeg@7/bin:$PATH"
 # for internal skill
 
