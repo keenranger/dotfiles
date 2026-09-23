@@ -22,8 +22,14 @@ Tool-specific configuration stays under the tool directory:
 ## Installation Commands
 
 ```bash
-# Full personal-machine installation
+# Full personal-machine installation (one administrator prompt)
 ./install.sh
+
+# Same bootstrap with an optional portable GPG restore
+./install.sh bootstrap --gpg-backup FILE
+
+# Company Codex machine profile
+./install.sh codex_machine
 
 # Only update symlinks and managed Codex pet copies
 ./install.sh create_symlinks
@@ -43,8 +49,34 @@ Tool-specific configuration stays under the tool directory:
 # Cloud tooling
 ./install.sh set_cloud
 
+# Standalone agent CLIs
+./install.sh set_claude
+./install.sh set_codex
+
+# Global Git identity, GPG backup and restore
+./install.sh set_git
+./install.sh set_gpg backup DIR
+./install.sh set_gpg restore FILE
+
 # Podman container runtime
 ./install.sh container
+```
+
+## Tests
+
+Shell tests under `tests/` run against the repository `install.sh` with the privileged and installer commands they cover replaced by stubs:
+
+```bash
+bash tests/bootstrap.sh
+bash tests/gpg-backup-restore.sh
+bash tests/routing-config.sh
+bash tests/standalone-clis.sh
+```
+
+Before opening a pull request that touches `install.sh`, `claude/settings.json`, or `agent/AGENTS.md`, syntax-check each shell file separately (`bash -n` only checks its first argument) and run the relevant suites:
+
+```bash
+for f in install.sh tests/*.sh; do bash -n "$f"; done
 ```
 
 ## Install Strategy
