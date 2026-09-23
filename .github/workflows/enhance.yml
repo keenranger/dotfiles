@@ -19,6 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # claude/settings.json hooks run via `uv run`; ubuntu-latest has no uv.
+      - uses: astral-sh/setup-uv@v6
+
       - name: Setup agent config
         run: |
           mkdir -p ~/.claude
