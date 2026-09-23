@@ -25,7 +25,7 @@ if rg -n 'CLAUDE_CODE_EFFORT_LEVEL|agent-hooks|statusLine' claude/settings.json;
 fi
 
 jq -e '
-	.model == "claude-fable-5-1[1m]" and
+	(has("model") | not) and
 	.effortLevel == "xhigh" and
 	.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS == "1"
 ' claude/settings.json >/dev/null
