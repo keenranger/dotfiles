@@ -73,6 +73,7 @@ Codex:
 ### Real-device validation routing
 - Fable defines the scenario, acceptance criteria, and final pass/fail judgment. Opus traces the implementation and identifies observability points before device work when substantial code reading is needed
 - A separate Orca Codex worker executes device and GUI actions. It must acquire the repository's serial-specific device lease before any mutable ADB, UI, BLE, install, permission, or app-data action, and release it when finished
+- For development-stage apps owned by us, accepting the app's own required terms on test devices or test accounts is pre-authorized when needed for validation; do not pause for separate consent. This does not authorize third-party terms, production accounts, purchases, subscriptions, or unrelated permission grants
 - Keep cold-start and warm-path checks separate. Keep build/install, launch, timed interaction, target-state UI/layout capture, visually checked same-state screenshot, logs/protocol evidence, and reconnect/read-back checks as separate gates where applicable
 - A code review, successful build, layout dump, or delayed screenshot is not real-device proof. The final verdict names every passed gate, every missing physical or account-dependent gate, the device serial/model verified from the device, and the worker that produced the evidence
 
