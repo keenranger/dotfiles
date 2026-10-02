@@ -31,11 +31,14 @@ jq -e '
 ' claude/settings.json >/dev/null
 
 rg -q 'Route substantial code reading to Claude Opus' agent/AGENTS.md
-rg -q 'Route architecture, coding judgment, synthesis, and final verdicts to Claude Fable' agent/AGENTS.md
+rg -q 'Route architecture, coding judgment, synthesis, and final verdicts to Claude Opus' agent/AGENTS.md
+if rg -ni 'fable' agent/AGENTS.md agent/skills/review/SKILL.md; then
+	echo "Shared routing prompts must use Opus instead of Fable" >&2
+	exit 1
+fi
 rg -q 'ORCA_WORKTREE_ID' agent/AGENTS.md
 for routing_file in agent/AGENTS.md agent/skills/review/SKILL.md; do
 	require_text 'claude -p --model opus' "$routing_file"
-	require_text 'claude -p --model fable' "$routing_file"
 	require_text 'best-effort one-shot' "$routing_file"
 	require_text 'Codex runtime permits child processes' "$routing_file"
 	require_text 'read-only tools' "$routing_file"
