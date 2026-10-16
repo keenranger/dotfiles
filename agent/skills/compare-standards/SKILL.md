@@ -10,7 +10,7 @@ Read internal standards from skill files and reference docs, then compare agains
 
 Process:
 
-- Identify relevant standard definitions (skill files, CLAUDE.md, reference docs)
+- Identify relevant standard definitions (skill files, AGENTS.md or CLAUDE.md, reference docs)
 - Locate current implementation (config files, code)
 - Compare values and flag discrepancies
 
