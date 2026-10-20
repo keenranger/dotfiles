@@ -14,19 +14,20 @@
 
 ## Scope and Context
 - Cross-cutting changes (field renames, API updates): always check test files, shell scripts, docs, and all consuming code for missed references
-- When scope is ambiguous, confirm the specific target (issue ID, branch, directory) before starting work
+- Infer the target from the request and current workspace. State reasonable assumptions and continue safe work; ask only when unresolved ambiguity would materially change the result or cause an irreversible action
 - Migration / lint / rename PRs: only touch files required for the migration. Do NOT reformat unrelated files (Python, markdown, configs), refactor hook deps, or polish adjacent code. If a broader change feels warranted, propose it as a one-liner and wait before editing
 
 ## Code Discipline
-- State assumptions explicitly; when multiple interpretations exist, present options rather than picking silently
+- State material assumptions. Resolve routine implementation choices using context; ask when alternatives materially change scope or behavior
 - Push back when a simpler approach exists; self-test: "Would a senior engineer say this is overcomplicated?"
 - Match existing style, even if you'd do it differently
 - Every changed line must trace directly to the request
 - Remove imports/variables your changes made unused, but leave pre-existing dead code alone
 - Write documentation and comments in English unless told otherwise
 - For vague tasks, define verifiable success criteria before writing code - prefer test-first: write a failing test, then make it pass
-- For non-trivial changes, present the approach (which files, what strategy) and wait for approval before editing
-- If the user corrects the same kind of misinterpretation twice in one session, stop, name the pattern, and propose a permanent fix (AGENTS.md rule, memory entry, or skill update) before continuing. The moment of the second correction is when the pattern is most visible -- don't defer this to /wrap or a retrospective pass
+- For non-trivial changes, briefly state the approach (which files, what strategy) and proceed within the authorized scope. Do not require approval solely because the work is non-trivial
+- User authorization persists across turns. Do not ask again for the same authorized action unless its scope or consequences materially change; preserve explicit publishing authorization and irreversible or destructive action requirements
+- If the user corrects the same kind of misinterpretation twice in one session, name the pattern, apply the correction, and propose a permanent fix (AGENTS.md rule, memory entry, or skill update) while continuing authorized work. Do not defer the proposal to /wrap or a retrospective pass
 - For generated images, pets, videos, or other visual artifacts, never state or imply the artifact exists until a generation/edit tool has returned a real result or a saved file has been verified. If the user asks to see an image, show the artifact or provide the verified path before describing it. If generation fails or returns no usable file, say that plainly and do not substitute a description for the missing output.
 
 ## Investigation Discipline
@@ -127,7 +128,7 @@ Codex:
 Always use both: metadata for structure, design_context for annotations.
 
 ### Implementation rules
-- Never assume design values -- present extracted spacing, color, and typography to the user for confirmation before editing
+- Extract spacing, color, and typography from the supplied design and implement them. Ask only for missing or conflicting values that materially affect the result
 - Trust the user's screenshot over tool output when they conflict
 - If Tailwind JIT fails to generate a class, use arbitrary values (`gap-[12px]`) or CSS variables immediately
 - After implementing, summarize every design value used so the user can verify at a glance
@@ -145,5 +146,5 @@ Executor routing:
 Main-loop exceptions (allowed in-process): `request_access` seeding, a single verification screenshot after the executor reports done, or the user explicitly asking the main model to drive the GUI itself.
 
 ## PR / Push discipline
-- NEVER `git push` or `gh pr create` without explicit user instruction. Local commits are fine to checkpoint work; opening a PR or pushing a branch is a publishing act that requires an explicit ask ("push", "open PR", "pr 올려", etc.). When work is ready, list what's local and wait for the go-signal before publishing. This applies even when the user previously said "let's prep a PR" — that's planning, not authorization to push
+- NEVER `git push` or `gh pr create` without explicit user instruction. Local commits are fine to checkpoint work; opening a PR or pushing a branch is a publishing act that requires an explicit ask ("push", "open PR", "pr 올려", etc.). When publishing has not been explicitly requested, list what is ready locally and wait. Once requested, complete the necessary commit, push, and PR creation without asking again. This applies even when the user previously said "let's prep a PR" — that's planning, not authorization to push
 - Vague autonomous goals like `/goal "알아서해결해"` or `/goal "handle it"` do NOT authorize publish-class actions: `git push`, `gh pr create`, `gh issue edit` on existing entities, `gh issue close`, branch force-push, repo creation, releases. Auto-mode classifier consistently rejects these when the goal text is vague; do not retry via alternate tools (gh api etc.) -- that's bypass, not authorization. Local commits, new file creation, and `gh issue create` (new content, no overwrite) ARE within scope of a vague goal. When a stop hook keeps re-firing because the goal asks for publish-class work that the classifier blocks, the resolution is to report the deadlock to the user and wait for an explicit verb-bearing trigger (one of "push", "edit issue", "open PR", "release"). The hook is mechanical; the safety system is the source of truth.
