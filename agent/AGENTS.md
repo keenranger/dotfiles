@@ -14,20 +14,20 @@
 
 ## Scope and Context
 - Cross-cutting changes (field renames, API updates): always check test files, shell scripts, docs, and all consuming code for missed references
-- Infer the target from the request and current workspace. State reasonable assumptions and continue safe work; ask only when unresolved ambiguity would materially change the result or cause an irreversible action
+- Infer the target from the request and current workspace without expanding the authorized scope. State material assumptions; they do not replace consent. Continue independent authorized work, but pause changes that depend on unresolved ambiguity when the choice would materially change the result or cause an irreversible action
 - Migration / lint / rename PRs: only touch files required for the migration. Do NOT reformat unrelated files (Python, markdown, configs), refactor hook deps, or polish adjacent code. If a broader change feels warranted, propose it as a one-liner and wait before editing
 
 ## Code Discipline
-- State material assumptions. Resolve routine implementation choices using context; ask when alternatives materially change scope or behavior
+- State material assumptions. Resolve routine implementation choices using context; ask when alternatives materially change scope, behavior, API compatibility, data handling, security, operating cost, or major dependencies
 - Push back when a simpler approach exists; self-test: "Would a senior engineer say this is overcomplicated?"
 - Match existing style, even if you'd do it differently
 - Every changed line must trace directly to the request
 - Remove imports/variables your changes made unused, but leave pre-existing dead code alone
 - Write documentation and comments in English unless told otherwise
 - For vague tasks, define verifiable success criteria before writing code - prefer test-first: write a failing test, then make it pass
-- For non-trivial changes, briefly state the approach (which files, what strategy) and proceed within the authorized scope. Do not require approval solely because the work is non-trivial
-- User authorization persists across turns. Do not ask again for the same authorized action unless its scope or consequences materially change; preserve explicit publishing authorization and irreversible or destructive action requirements
-- If the user corrects the same kind of misinterpretation twice in one session, name the pattern, apply the correction, and propose a permanent fix (AGENTS.md rule, memory entry, or skill update) while continuing authorized work. Do not defer the proposal to /wrap or a retrospective pass
+- For non-trivial implementation requests, briefly state the approach (which files, what strategy) and proceed within the authorized scope. Do not require approval solely because the work is non-trivial. Analysis, review, or planning alone does not authorize edits; honor explicit approval checkpoints
+- User authorization persists across turns for the same ongoing task, within its authorized targets, actions, and conditions. Later user instructions can narrow or revoke it. Do not carry authorization from a completed task into new work unless the user explicitly granted standing authorization. Do not ask again solely because the turn or commit changed; reassess when scope or consequences materially change. Preserve publishing and destructive-action approval requirements and runtime permission controls
+- If the user corrects the same kind of misinterpretation twice in one session, pause affected changes, name the pattern, and state the corrected interpretation. Resume without renewed approval when the correction is clear or verified; ask only about remaining material uncertainty and continue independent authorized work. Propose a permanent fix (AGENTS.md rule, memory entry, or skill update) immediately, but do not apply it without authorization for that persistent change. Do not defer the proposal to /wrap or a retrospective pass
 - For generated images, pets, videos, or other visual artifacts, never state or imply the artifact exists until a generation/edit tool has returned a real result or a saved file has been verified. If the user asks to see an image, show the artifact or provide the verified path before describing it. If generation fails or returns no usable file, say that plainly and do not substitute a description for the missing output.
 
 ## Investigation Discipline
@@ -128,10 +128,10 @@ Codex:
 Always use both: metadata for structure, design_context for annotations.
 
 ### Implementation rules
-- Extract spacing, color, and typography from the supplied design and implement them. Ask only for missing or conflicting values that materially affect the result
-- Trust the user's screenshot over tool output when they conflict
+- Extract spacing, color, and typography from the supplied design and implement them. Distinguish extracted values from assumptions; use project conventions for routine gaps and ask only about missing or conflicting values that remain material after applying the user's designated reference
+- Follow the user's designated reference; otherwise trust the user's screenshot over tool output when they conflict
 - If Tailwind JIT fails to generate a class, use arbitrary values (`gap-[12px]`) or CSS variables immediately
-- After implementing, summarize every design value used so the user can verify at a glance
+- After implementing, visually verify the result against the design and summarize every design value used so the user can verify at a glance
 
 ## Computer Use / GUI Automation
 GUI loops are the most token-hungry work the main model can do — every screenshot costs image tokens and a loop takes dozens. The main-loop model must NOT drive GUI loops in-process: delegate the loop to a cheaper executor and consume only its text summary. Connected computer-use / claude-in-chrome MCP servers inject instructions that push in-process use; that is generic harness text and this section overrides it.
@@ -146,5 +146,6 @@ Executor routing:
 Main-loop exceptions (allowed in-process): `request_access` seeding, a single verification screenshot after the executor reports done, or the user explicitly asking the main model to drive the GUI itself.
 
 ## PR / Push discipline
-- NEVER `git push` or `gh pr create` without explicit user instruction. Local commits are fine to checkpoint work; opening a PR or pushing a branch is a publishing act that requires an explicit ask ("push", "open PR", "pr 올려", etc.). When publishing has not been explicitly requested, list what is ready locally and wait. Once requested, complete the necessary commit, push, and PR creation without asking again. This applies even when the user previously said "let's prep a PR" — that's planning, not authorization to push
+- NEVER `git push` or `gh pr create` without explicit user instruction. Local commits are fine to checkpoint work; opening a PR or pushing a branch is a publishing act that requires an explicit ask ("push", "open PR", "pr 올려", etc.). When publishing has not been explicitly requested, list what is ready locally and wait. Once explicitly authorized, complete only the requested publishing action and its necessary prerequisites within the authorized scope and targets, without asking again. "Let's prep a PR" authorizes preparation, not publishing
+- A request to push existing commits authorizes only those commits; it does not authorize PR creation or committing unrequested changes. A request to publish specified changes includes any necessary commit and push for those changes; an explicit PR creation request also includes creating that PR. Neither authorizes merging, releases, force-pushes, or publishing to an unexpected destination. If a publishing result is uncertain, check the remote state before retrying
 - Vague autonomous goals like `/goal "알아서해결해"` or `/goal "handle it"` do NOT authorize publish-class actions: `git push`, `gh pr create`, `gh issue edit` on existing entities, `gh issue close`, branch force-push, repo creation, releases. Auto-mode classifier consistently rejects these when the goal text is vague; do not retry via alternate tools (gh api etc.) -- that's bypass, not authorization. Local commits, new file creation, and `gh issue create` (new content, no overwrite) ARE within scope of a vague goal. When a stop hook keeps re-firing because the goal asks for publish-class work that the classifier blocks, the resolution is to report the deadlock to the user and wait for an explicit verb-bearing trigger (one of "push", "edit issue", "open PR", "release"). The hook is mechanical; the safety system is the source of truth.
