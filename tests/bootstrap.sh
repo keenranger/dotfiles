@@ -245,4 +245,51 @@ HOME="$symlink_home" create_claude_symlinks
 backup_count_after=$(find "$DOTFILES_BACKUP_DIR" -mindepth 1 | wc -l | tr -d ' ')
 [ "$backup_count_before" = "$backup_count_after" ]
 
+# Isolate skill ownership cases from the checkout and the real user HOME.
+(
+	HOME="$test_root/skill-home"
+	SRCDIR="$test_root/skill-source"
+	DOTFILES_BACKUP_DIR=
+	mkdir -p "$SRCDIR/agent/skills/shared" "$SRCDIR/agent/skills/divergent" \
+		"$HOME/.agents/skills/divergent" "$HOME/.agents/skills/orchestration" \
+		"$HOME/.codex/skills" "$test_root/foreign-skill"
+	printf 'shared\n' > "$SRCDIR/agent/skills/shared/SKILL.md"
+	printf 'canonical\n' > "$SRCDIR/agent/skills/divergent/SKILL.md"
+	printf 'local\n' > "$HOME/.agents/skills/divergent/SKILL.md"
+	printf 'instructions\n' > "$SRCDIR/agent/AGENTS.md"
+	ln -s "$SRCDIR/agent/skills/removed" "$HOME/.agents/skills/removed"
+	ln -s "$SRCDIR/agent/skills/removed" "$HOME/.codex/skills/removed"
+	ln -s "$test_root/foreign-skill" "$HOME/.agents/skills/foreign"
+	ln -s "$test_root/missing" "$HOME/.agents/skills/unowned-broken"
+	ln -s "$SRCDIR/agent/skills/missing-other-name" "$HOME/.agents/skills/mismatched"
+	ln -s "$HOME/.agents/skills/orchestration" "$SRCDIR/agent/skills/orchestration"
+	# This ignored source mirrors local orchestration state and must not be pruned.
+	git -C "$SRCDIR" init -q
+	printf 'agent/skills/orchestration\nagent/skills/ignored-absent\n' > "$SRCDIR/.gitignore"
+	ln -s "$SRCDIR/agent/skills/ignored-absent" "$HOME/.agents/skills/ignored-absent"
+	create_codex_symlinks
+	[ -L "$HOME/.agents/skills/ignored-absent" ]
+	[ ! -L "$DOTFILES_BACKUP_DIR/.agents/skills/ignored-absent" ]
+	for root in .agents .codex; do
+		[ "$(readlink "$HOME/$root/skills/shared")" = "$SRCDIR/agent/skills/shared" ]
+		[ ! -L "$HOME/$root/skills/removed" ]
+		[ -L "$DOTFILES_BACKUP_DIR/$root/skills/removed" ]
+	done
+	[ ! -L "$HOME/.agents/skills/divergent" ]
+	grep -q '^local$' "$HOME/.agents/skills/divergent/SKILL.md"
+	[ "$(readlink "$HOME/.agents/skills/foreign")" = "$test_root/foreign-skill" ]
+	[ -L "$HOME/.agents/skills/unowned-broken" ]
+	[ -L "$HOME/.agents/skills/mismatched" ]
+	[ -d "$HOME/.agents/skills/orchestration" ]
+	[ ! -L "$HOME/.agents/skills/orchestration" ]
+	# Also guard against self-links for a non-ignored canonical source.
+	printf 'agent/skills/ignored-absent\n' > "$SRCDIR/.gitignore"
+	link_agent_skills "$HOME/.agents/skills"
+	[ ! -L "$HOME/.agents/skills/orchestration" ]
+	before=$(find "$DOTFILES_BACKUP_DIR" -mindepth 1 | wc -l | tr -d ' ')
+	create_codex_symlinks
+	after=$(find "$DOTFILES_BACKUP_DIR" -mindepth 1 | wc -l | tr -d ' ')
+	[ "$before" = "$after" ]
+)
+
 echo "Bootstrap orchestration test passed"

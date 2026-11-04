@@ -216,7 +216,7 @@ is_managed_skill_symlink(){
 
 	case "$target" in
 		"$SRCDIR/agent/skills"/*|"$SRCDIR/claude/skills"/*)
-			return 0
+			[ "$(basename "$target")" = "$(basename "$dst")" ]
 			;;
 		"$HOME/.codex/worktrees"/*/dotfiles/agent/skills/*|"$HOME/.codex/worktrees"/*/dotfiles/claude/skills/*)
 			[ "$(basename "$target")" = "$(basename "$dst")" ]
@@ -273,10 +273,31 @@ copy_codex_pet(){
 	printf "codex/pets/%s\n" "$name" > "$marker"
 }
 
+prune_stale_agent_skill_symlinks(){
+	local dst_dir=$1
+	local dst name src
+
+	for dst in "$dst_dir"/*; do
+		[ -L "$dst" ] || continue
+		is_managed_skill_symlink "$dst" || continue
+		name=$(basename "$dst")
+		src="$SRCDIR/agent/skills/$name"
+		# A source symlink may intentionally point to local, ignored skill state.
+		[ ! -e "$src" ] && [ ! -L "$src" ] || continue
+		if command -v git >/dev/null 2>&1 &&
+			git -C "$SRCDIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 &&
+			git -C "$SRCDIR" check-ignore -q "agent/skills/$name"; then
+			continue
+		fi
+		backup_existing_path "$dst"
+	done
+}
+
 link_agent_skills(){
 	local dst_dir=$1
 
 	mkdir -p "$dst_dir"
+	prune_stale_agent_skill_symlinks "$dst_dir"
 	for src in "$SRCDIR"/agent/skills/*; do
 		[ -e "$src" ] || [ -L "$src" ] || continue
 		local name
@@ -288,6 +309,12 @@ link_agent_skills(){
 			continue
 		fi
 		local dst="$dst_dir/$name"
+
+		# Do not replace a directory reached through a canonical source symlink
+		# with a link back to that same source (which would create a cycle).
+		if [ "$src" -ef "$dst" ]; then
+			continue
+		fi
 
 		if [ ! -e "$dst" ] && [ ! -L "$dst" ]; then
 			replace_symlink "$src" "$dst"
@@ -393,9 +420,10 @@ create_claude_symlinks(){
 }
 
 create_codex_symlinks(){
-	mkdir -p "$HOME/.codex/skills" "$HOME/.codex/pets"
+	mkdir -p "$HOME/.codex/skills" "$HOME/.agents/skills" "$HOME/.codex/pets"
 	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.codex/AGENTS.md"
 	link_agent_skills "$HOME/.codex/skills"
+	link_agent_skills "$HOME/.agents/skills"
 	install_codex_pets "$HOME/.codex/pets"
 }
 

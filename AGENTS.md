@@ -11,7 +11,7 @@ This is a personal dotfiles repository for managing development environment conf
 Shared agent rules and reusable workflow skills live under `agent/`:
 
 - `agent/AGENTS.md`: canonical shared instructions for Codex, Claude Code, and similar coding agents.
-- `agent/skills/`: shared skills that may be exposed to both `~/.codex/skills` and `~/.claude/skills`.
+- `agent/skills/`: shared skills that may be exposed to `~/.codex/skills`, `~/.agents/skills`, and `~/.claude/skills`.
 
 Tool-specific configuration stays under the tool directory:
 
@@ -95,7 +95,9 @@ Claude Code can use the shared skill directory directly:
 ~/.claude/skills -> dotfiles/agent/skills
 ```
 
-Codex keeps its own `~/.codex/skills` directory because Codex may install runtime or connector skills there. The installer links each managed shared skill individually and skips existing non-managed symlink or non-symlink skills unless their contents already match the repository copy.
+Codex keeps its own `~/.codex/skills` directory because Codex may install runtime or connector skills there. The installer links each managed shared skill individually into both `~/.codex/skills` and `~/.agents/skills` and skips existing non-managed symlink or non-symlink skills unless their contents already match the repository copy.
+
+Stale managed skill symlinks are moved to the dated backup directory only when the corresponding canonical source is absent. Foreign links, divergent local directories, ignored sources, and source symlinks remain untouched. Never replace a skill directory with a link whose source resolves back to that directory.
 
 Managed Codex pets are copied individually because Codex expects real pet package directories:
 

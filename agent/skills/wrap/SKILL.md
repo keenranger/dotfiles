@@ -23,24 +23,24 @@ If trivial, output one line: `Trivial change; nothing to wrap. Retry with WRAP_O
 
 Verify the diff matches a single intent:
 - Flag unrelated reformatting, opportunistic cleanup, or edits in files not required by the stated task
-- Migration / lint / rename PRs are especially prone to scope drift (see CLAUDE.md "Scope and Context")
+- Migration / lint / rename PRs are especially prone to scope drift (see the active AGENTS.md or CLAUDE.md "Scope and Context")
 - If scope drift suspected, surface `Diff touches X which seems unrelated to <stated intent>. Split into a follow-up commit?` and wait for confirmation before proceeding
 
 ## Step 3: Analysis (substantive only)
 
-Run enhance agent (CLAUDE.md updates, automation opportunities, follow-ups). Pass session context.
+Run enhance agent (AGENTS.md or CLAUDE.md updates, automation opportunities, follow-ups). Pass session context.
 
-After enhance completes, run permission analysis via the **built-in `fewer-permission-prompts` skill** (not the custom `permission-analyzer` agent -- the built-in is automode-aware and writes to project settings automatically).
+In Claude Code, after enhance completes, run permission analysis via the **built-in `fewer-permission-prompts` skill**, when available (not the custom `permission-analyzer` agent -- the built-in is automode-aware and writes to project settings automatically). In Codex, report any permission proposal for user review; do not assume that Claude-only skills are available or modify approval or sandbox settings as part of this analysis.
 
-Note: session-level retrospective analysis (course-corrections, ambiguity, missed efficiency) is **not** done here. The user's CLAUDE.md captures repeat-correction patterns in-session at the moment they occur; that obviates a post-hoc retrospective pass.
+Note: session-level retrospective analysis (course-corrections, ambiguity, missed efficiency) is **not** done here. The user's active AGENTS.md or CLAUDE.md captures repeat-correction patterns in-session at the moment they occur; that obviates a post-hoc retrospective pass.
 
 ### Permission scope split
 
-`fewer-permission-prompts` only touches project settings (`.claude/settings.json`). For commands that are generally useful across projects (git, pnpm, ruff, etc.), surface them as candidates for **user settings** (`~/.claude/settings.json`) manually -- ask the user before adding.
+In Claude Code, `fewer-permission-prompts` only touches project settings (`.claude/settings.json`). For commands that are generally useful across projects (git, pnpm, ruff, etc.), surface them as candidates for **user settings** (`~/.claude/settings.json`) manually -- ask the user before adding.
 
 ### Auto-mode permission framing
 
-User runs in `defaultMode: "auto"`. Most commands execute silently, so a blanket "what ran in this session" list is no longer a useful whitelist signal. Meaningful signals only:
+When Claude Code uses `defaultMode: "auto"`, apply the following framing. Most commands execute silently, so a blanket "what ran in this session" list is no longer a useful whitelist signal. Meaningful signals only:
 - Commands that **still** triggered a prompt despite automode
 - Commands that required `dangerouslyDisableSandbox`
 - Commands the user explicitly denied, then re-ran with adjustments
@@ -51,7 +51,7 @@ The built-in skill already filters for these. Skip proposals for commands that s
 ## Focus areas
 
 - Learnings: Technical discoveries, mistakes made, new patterns
-- CLAUDE.md: Preferences or patterns worth persisting
+- AGENTS.md or CLAUDE.md: Preferences or patterns worth persisting
 - Permissions: Commands that bypassed normal flow (see auto-mode framing)
 - Automation: Repetitive patterns that could become skills/commands/agents
 - Follow-ups: Incomplete work, TODO markers, next session priorities
@@ -60,13 +60,13 @@ The built-in skill already filters for these. Skip proposals for commands that s
 
 ## Duplicate check
 
-- Before proposing, check both project (`.claude/`) and user (`~/.claude/`) locations
+- Before proposing, check project and user locations for the active runtime: `.claude/` and `~/.claude/` for Claude Code, `.codex/` and `~/.codex/` for Codex
 - Skip proposals that duplicate existing content
 
 ## Permission placement
 
-- Project settings (`.claude/settings.json`) for project-specific permissions
-- User settings (`~/.claude/settings.json`) for personal/global tools
+- Claude Code: project settings (`.claude/settings.json` or `.claude/settings.local.json`) for project-specific permissions; user settings (`~/.claude/settings.json`) for personal/global tools
+- Codex: project configuration (`.codex/config.toml`) and user configuration (`~/.codex/config.toml`) are TOML, not Claude permission JSON. Report approval and sandbox proposals separately for explicit user review
 
 ## Output
 
@@ -80,8 +80,8 @@ The built-in skill already filters for these. Skip proposals for commands that s
 
 ## User selection
 
-- Present options via AskUserQuestion
-- Options: update CLAUDE.md, add permissions, create automations, skip
+- Present options via the active runtime's user-question tool, when available
+- Options: update AGENTS.md or CLAUDE.md, add permissions, create automations, skip
 - Execute only selected actions
 
 Goal: Enrich configuration before each substantive commit; do not burn cycles on trivial ones.

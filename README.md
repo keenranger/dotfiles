@@ -49,13 +49,17 @@ If `/Applications/ChatGPT.app` already exists, the installer skips its Homebrew 
 
 When a dotfile destination already contains a real file, directory, or different symlink, the installer moves it into a dated directory under `~/.dotfiles-backups/` before creating the managed symlink. Re-running against an already-correct managed symlink leaves it unchanged.
 
-`create_codex_symlinks` links managed shared skills individually into `~/.codex/skills` and copies managed pets into `~/.codex/pets` so Codex-installed runtime skills, non-managed symlinks, and non-managed pet directories remain in place.
+`create_codex_symlinks` links managed shared skills individually into `~/.codex/skills` and the user discovery root `~/.agents/skills` and copies managed pets into `~/.codex/pets` so Codex-installed runtime skills, non-managed symlinks, and non-managed pet directories remain in place.
+
+Skill refreshes preserve divergent local copies and foreign links. Stale links owned by this dotfiles repository are moved to the dated `~/.dotfiles-backups/` directory, never discarded. Canonical skills that resolve to an existing destination directory are left in place to avoid symlink cycles.
 
 The full install profiles install both standalone agent CLIs. Run `./install.sh set_claude` or `./install.sh set_codex` to install only Claude Code or Codex CLI.
 
 ## Agent runtime boundaries
 
 `agent/AGENTS.md` and `agent/skills/` contain the portable cross-harness routing policy. `claude/settings.json` contains the intentional Claude Code baseline and is linked into `~/.claude`; Claude Code and Orca may append machine-local UI, hook, and status-line state to that linked file. Preserve those live additions when reconciling checkouts, but do not commit Orca `agent-hooks` commands, `statusLine`, or machine-specific UI state.
+
+Repository-specific `autoMode.environment` context belongs in that repository's `.claude/settings.local.json`, not the shared user baseline. Keep local settings out of commits; move context without changing permission rules or other runtime settings.
 
 Codex model selection, reasoning effort, MCP servers, connectors, approvals, sessions, and plugin caches remain host-local under `~/.codex`. Shared policy refers to the configured Codex default instead of pinning a model name that the repository does not control.
 

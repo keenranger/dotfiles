@@ -30,6 +30,13 @@ jq -e '
 	.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS == "1"
 ' claude/settings.json >/dev/null
 
+jq -e '(.autoMode // {} | has("environment") | not)' claude/settings.json >/dev/null
+
+if rg -n '\.Codex/|Codex -p|Codex mcp serve|Codex-4\.6-sonnet' agent/skills; then
+	echo "Shared skills contain mechanically renamed commands or configuration paths" >&2
+	exit 1
+fi
+
 rg -q 'Route substantial code reading to Claude Opus' agent/AGENTS.md
 rg -q 'Route architecture, coding judgment, synthesis, and final verdicts to Claude Opus' agent/AGENTS.md
 if rg -ni 'fable' agent/AGENTS.md agent/skills/review/SKILL.md; then
