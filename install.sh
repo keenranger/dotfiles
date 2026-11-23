@@ -381,10 +381,17 @@ create_shell_symlinks(){
 	fi
 }
 
+warn_existing_claude_agents(){
+	if [ -e "$HOME/.claude/AGENTS.md" ] || [ -L "$HOME/.claude/AGENTS.md" ]; then
+		echo "Warning: preserving $HOME/.claude/AGENTS.md; global links will be retargeted to $SRCDIR/agent/global/AGENTS.md while this existing path stays intact. Complete the separately approved move-to-backup transition to avoid mixed global instruction sources." >&2
+	fi
+}
+
 create_claude_symlinks(){
+	warn_existing_claude_agents
 	mkdir -p "$HOME/.claude"
-	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.claude/CLAUDE.md"
-	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.claude/AGENTS.md"
+	replace_symlink "$SRCDIR/agent/global/AGENTS.md" "$HOME/.claude/CLAUDE.md"
+	# Existing aliases require a separately approved move to backup.
 	replace_symlink "$SRCDIR/agent/skills" "$HOME/.claude/skills"
 	replace_symlink_if_source_exists "$SRCDIR/claude/commands" "$HOME/.claude/commands"
 	replace_symlink_if_source_exists "$SRCDIR/claude/hooks" "$HOME/.claude/hooks"
@@ -393,8 +400,9 @@ create_claude_symlinks(){
 }
 
 create_codex_symlinks(){
+	warn_existing_claude_agents
 	mkdir -p "$HOME/.codex/skills" "$HOME/.codex/pets"
-	replace_symlink "$SRCDIR/agent/AGENTS.md" "$HOME/.codex/AGENTS.md"
+	replace_symlink "$SRCDIR/agent/global/AGENTS.md" "$HOME/.codex/AGENTS.md"
 	link_agent_skills "$HOME/.codex/skills"
 	install_codex_pets "$HOME/.codex/pets"
 }

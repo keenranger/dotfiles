@@ -27,7 +27,7 @@ When called directly (e.g., /enhance):
 
 ## Configuration Locations
 
-- `agent/AGENTS.md` - Shared preferences and cross-agent rules
+- `agent/global/AGENTS.md` - Shared preferences and cross-agent rules
 - `agent/skills/` - Shared domain knowledge and workflows
 - `claude/agents/` - Claude-specific executors
 - `claude/commands/` - Claude-specific workflow shortcuts

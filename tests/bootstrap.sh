@@ -245,4 +245,34 @@ HOME="$symlink_home" create_claude_symlinks
 backup_count_after=$(find "$DOTFILES_BACKUP_DIR" -mindepth 1 | wc -l | tr -d ' ')
 [ "$backup_count_before" = "$backup_count_after" ]
 
+# Existing aliases must be warned about, preserved on rerun, and reversible.
+(
+	HOME="$test_root/mixed-home"
+	SRCDIR="$test_root/mixed-source"
+	DOTFILES_BACKUP_DIR=
+	mkdir -p "$HOME/.claude" "$HOME/.codex" "$SRCDIR/agent/global" "$SRCDIR/agent/skills"
+	printf 'legacy instructions\n' > "$SRCDIR/agent/AGENTS.md"
+	printf 'global instructions\n' > "$SRCDIR/agent/global/AGENTS.md"
+	for path in .claude/CLAUDE.md .claude/AGENTS.md .codex/AGENTS.md; do
+		ln -s "$SRCDIR/agent/AGENTS.md" "$HOME/$path"
+	done
+	create_claude_symlinks 2> "$test_root/mixed-warnings.log"
+	create_codex_symlinks 2>> "$test_root/mixed-warnings.log"
+	grep -Fq "Warning: preserving $HOME/.claude/AGENTS.md" "$test_root/mixed-warnings.log"
+	[ "$(readlink "$HOME/.claude/CLAUDE.md")" = "$SRCDIR/agent/global/AGENTS.md" ]
+	[ "$(readlink "$HOME/.codex/AGENTS.md")" = "$SRCDIR/agent/global/AGENTS.md" ]
+	[ "$(readlink "$HOME/.claude/AGENTS.md")" = "$SRCDIR/agent/AGENTS.md" ]
+	before=$(find "$DOTFILES_BACKUP_DIR" -mindepth 1 | wc -l | tr -d ' ')
+	create_claude_symlinks 2>> "$test_root/mixed-warnings.log"
+	create_codex_symlinks 2>> "$test_root/mixed-warnings.log"
+	after=$(find "$DOTFILES_BACKUP_DIR" -mindepth 1 | wc -l | tr -d ' ')
+	[ "$before" = "$after" ]
+	for path in .claude/CLAUDE.md .claude/AGENTS.md .codex/AGENTS.md; do
+		ln -sfn "$SRCDIR/agent/AGENTS.md" "$HOME/$path"
+		[ "$(readlink "$HOME/$path")" = "$SRCDIR/agent/AGENTS.md" ]
+	done
+	grep -q '^legacy instructions$' "$HOME/.claude/AGENTS.md"
+)
+
+bash "$repo_dir/tests/global-instructions.sh"
 echo "Bootstrap orchestration test passed"
