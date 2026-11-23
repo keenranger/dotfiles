@@ -4,7 +4,7 @@ Personal dotfiles and shared agent configuration for local development machines.
 
 ## Layout
 
-- `agent/AGENTS.md`: shared instructions for Codex, Claude Code, and similar coding agents.
+- `agent/global/AGENTS.md`: shared instructions for Codex, Claude Code, and similar coding agents.
 - `agent/skills/`: shared workflow skills.
 - `codex/pets/`: managed Codex pet packages.
 - `claude/`: Claude Code-specific settings, hooks, and agents.
@@ -55,7 +55,7 @@ The full install profiles install both standalone agent CLIs. Run `./install.sh 
 
 ## Agent runtime boundaries
 
-`agent/AGENTS.md` and `agent/skills/` contain the portable cross-harness routing policy. `claude/settings.json` contains the intentional Claude Code baseline and is linked into `~/.claude`; Claude Code and Orca may append machine-local UI, hook, and status-line state to that linked file. Preserve those live additions when reconciling checkouts, but do not commit Orca `agent-hooks` commands, `statusLine`, or machine-specific UI state.
+`agent/global/AGENTS.md` and `agent/skills/` contain the portable cross-harness routing policy. `claude/settings.json` contains the intentional Claude Code baseline and is linked into `~/.claude`; Claude Code and Orca may append machine-local UI, hook, and status-line state to that linked file. Preserve those live additions when reconciling checkouts, but do not commit Orca `agent-hooks` commands, `statusLine`, or machine-specific UI state.
 
 Codex model selection, reasoning effort, MCP servers, connectors, approvals, sessions, and plugin caches remain host-local under `~/.codex`. Shared policy refers to the configured Codex default instead of pinning a model name that the repository does not control.
 
@@ -73,3 +73,32 @@ Codex model selection, reasoning effort, MCP servers, connectors, approvals, ses
 ## Optional OpenClaw MCP over Tailscale
 
 See [cross-machine MCP setup](docs/openclaw-mcp.md). The tracked launcher is reusable; client registrations, Gateway URL, credentials, and pairing stay host-local.
+
+## Global instruction loading
+
+`agent/global/AGENTS.md` is the single compact global instruction source, with
+all active policy inline and no imports or topical reference files. Running the
+relevant installer commands immediately retargets `~/.claude/CLAUDE.md` and
+`~/.codex/AGENTS.md` to it. The installer no longer creates `~/.claude/AGENTS.md`;
+if that path already exists it warns and leaves it intact, potentially pointing
+at a different legacy source. It never silently moves that alias. On this machine
+the actual HOME transition is still pending approval: retarget the two links and
+move only the `~/.claude/AGENTS.md` symlink to the dated backup as one unit.
+Do not run the installer on the real HOME before that approval. Start a fresh
+session after transition.
+
+`agent/AGENTS.md`, repository-local `claude/CLAUDE.md` and repository AGENTS.md
+are preserved for existing local consumers. Their old canonical wording is
+historical; future global policy edits belong in `agent/global/AGENTS.md`.
+`tests/global-instructions.sh` records the full legacy compatibility digest so
+changes in any section require reconciliation with the active policy; update
+that digest deliberately after review rather than copying historical wording
+into the new source. Bootstrap tests and the enhance workflow run these checks.
+The enhance workflow loads and proposes global edits to the new source only.
+Runtime, MCP, authentication and permissions are unchanged.
+
+Claude Code native AGENTS.md support scans project ancestors; it does not make
+`~/.claude/AGENTS.md` a documented user-global entrypoint outside HOME. Keep
+`~/.claude/CLAUDE.md` pointing to the one source for user-wide coverage.
+The official memory guide documents deduplication of imports/symlinks; listed
+paths alone do not measure repeated context or byte/token savings.

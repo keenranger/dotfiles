@@ -14,7 +14,7 @@ require_text() {
 	fi
 }
 
-if rg -n 'gpt-[0-9]' agent/AGENTS.md agent/skills/review claude; then
+if rg -n 'gpt-[0-9]' agent/global/AGENTS.md agent/skills/review claude; then
 	echo "Shared configuration must not pin a Codex model name" >&2
 	exit 1
 fi
@@ -30,14 +30,14 @@ jq -e '
 	.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS == "1"
 ' claude/settings.json >/dev/null
 
-rg -q 'Route substantial code reading to Claude Opus' agent/AGENTS.md
-rg -q 'Route architecture, coding judgment, synthesis, and final verdicts to Claude Opus' agent/AGENTS.md
-if rg -ni 'fable' agent/AGENTS.md agent/skills/review/SKILL.md; then
+rg -q 'Route substantial code reading to Claude Opus' agent/global/AGENTS.md
+rg -q 'Route architecture, coding judgment, synthesis, and final verdicts to Claude Opus' agent/global/AGENTS.md
+if rg -ni 'fable' agent/global/AGENTS.md agent/skills/review/SKILL.md; then
 	echo "Shared routing prompts must use Opus instead of Fable" >&2
 	exit 1
 fi
-rg -q 'ORCA_WORKTREE_ID' agent/AGENTS.md
-for routing_file in agent/AGENTS.md agent/skills/review/SKILL.md; do
+rg -q 'ORCA_WORKTREE_ID' agent/global/AGENTS.md
+for routing_file in agent/global/AGENTS.md agent/skills/review/SKILL.md; do
 	require_text 'claude -p --model opus' "$routing_file"
 	require_text 'best-effort one-shot' "$routing_file"
 	require_text 'Codex runtime permits child processes' "$routing_file"
@@ -46,11 +46,11 @@ for routing_file in agent/AGENTS.md agent/skills/review/SKILL.md; do
 	require_text 'not a Codex-native agent or a Claude-model MCP bridge' "$routing_file"
 	require_text 'claude mcp serve' "$routing_file"
 done
-require_text 'as the managed path:' agent/AGENTS.md
+require_text 'as the managed path:' agent/global/AGENTS.md
 require_text 'managed cross-runtime path:' agent/skills/review/SKILL.md
-rg -q 'serial-specific device lease' agent/AGENTS.md
+rg -q 'serial-specific device lease' agent/global/AGENTS.md
 rg -q 'Workers must not invoke `/review`' agent/skills/review/SKILL.md
-require_text 'codex exec --ephemeral --sandbox read-only' agent/AGENTS.md
+require_text 'codex exec --ephemeral --sandbox read-only' agent/global/AGENTS.md
 require_text 'codex exec --ephemeral --sandbox read-only' agent/skills/review/SKILL.md
 rg -q 'recursively launches reviewers' agent/skills/review/SKILL.md
 
