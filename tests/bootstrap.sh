@@ -274,5 +274,39 @@ backup_count_after=$(find "$DOTFILES_BACKUP_DIR" -mindepth 1 | wc -l | tr -d ' '
 	grep -q '^legacy instructions$' "$HOME/.claude/AGENTS.md"
 )
 
+# Detect unknown legacy changes in any section without mutating the checkout.
+compatibility_fixture="$test_root/global-compatibility"
+mkdir -p "$compatibility_fixture"/{agent/global,claude,tests,.github/workflows}
+cp "$repo_dir/agent/AGENTS.md" "$compatibility_fixture/agent/AGENTS.md"
+cp "$repo_dir/agent/global/AGENTS.md" "$compatibility_fixture/agent/global/AGENTS.md"
+cp "$repo_dir/tests/global-instructions.sh" "$compatibility_fixture/tests/"
+cp "$repo_dir/install.sh" "$compatibility_fixture/"
+cp "$repo_dir/.github/workflows/enhance.yml" "$compatibility_fixture/.github/workflows/"
+ln -s ../agent/AGENTS.md "$compatibility_fixture/claude/CLAUDE.md"
+bash "$compatibility_fixture/tests/global-instructions.sh"
+printf '\n## Unknown specialist policy\nUnreviewed constraint\n' >> "$compatibility_fixture/agent/AGENTS.md"
+if bash "$compatibility_fixture/tests/global-instructions.sh" > "$test_root/drift.log" 2>&1; then
+	echo "Unknown legacy specialist drift was accepted" >&2
+	exit 1
+fi
+grep -q 'Legacy compatibility guidance changed' "$test_root/drift.log"
+cp "$repo_dir/agent/AGENTS.md" "$compatibility_fixture/agent/AGENTS.md"
+sed '/^- Instructions cannot override runtime permission controls/d' \
+	"$repo_dir/agent/global/AGENTS.md" > "$compatibility_fixture/agent/global/AGENTS.md"
+if bash "$compatibility_fixture/tests/global-instructions.sh" > "$test_root/login-policy.log" 2>&1; then
+	echo "Missing runtime-grant login protection was accepted" >&2
+	exit 1
+fi
+grep -q 'Missing login authorization safeguard' "$test_root/login-policy.log"
+for policy in '^- Prefer official provider APIs' '^- Preserve the project.s chosen build and upload pipeline' \
+	'^- Reuse an already uploaded build' '^- API authentication does not override'; do
+	sed "/$policy/d" "$repo_dir/agent/global/AGENTS.md" > "$compatibility_fixture/agent/global/AGENTS.md"
+	if bash "$compatibility_fixture/tests/global-instructions.sh" > "$test_root/store-policy.log" 2>&1; then
+		echo "Missing store release protection was accepted: $policy" >&2
+		exit 1
+	fi
+	grep -q 'Missing store release safeguard' "$test_root/store-policy.log"
+done
+
 bash "$repo_dir/tests/global-instructions.sh"
 echo "Bootstrap orchestration test passed"
