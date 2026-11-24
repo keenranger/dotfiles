@@ -102,6 +102,10 @@ separately installed workflow dependencies, not bundled by this repository.
 On the current Mac they resolve through the existing local skill installation;
 this cleanup does not publish their private/untracked symlinks or install them
 on a fresh machine. Unknown later legacy changes still fail the drift check.
+The verified 2026-11-25 owner snapshot additionally preserves store release
+automation safeguards inline: supported provider APIs, existing pipeline/build
+reuse, credential boundaries and no bypass of runtime denials. Its compatibility
+digest is accepted only after reconciling that complete policy delta.
 Runtime, MCP, authentication and permissions are unchanged.
 
 Claude Code native AGENTS.md support scans project ancestors; it does not make

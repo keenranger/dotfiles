@@ -298,6 +298,15 @@ if bash "$compatibility_fixture/tests/global-instructions.sh" > "$test_root/logi
 	exit 1
 fi
 grep -q 'Missing login authorization safeguard' "$test_root/login-policy.log"
+for policy in '^- Prefer official provider APIs' '^- Preserve the project.s chosen build and upload pipeline' \
+	'^- Reuse an already uploaded build' '^- API authentication does not override'; do
+	sed "/$policy/d" "$repo_dir/agent/global/AGENTS.md" > "$compatibility_fixture/agent/global/AGENTS.md"
+	if bash "$compatibility_fixture/tests/global-instructions.sh" > "$test_root/store-policy.log" 2>&1; then
+		echo "Missing store release protection was accepted: $policy" >&2
+		exit 1
+	fi
+	grep -q 'Missing store release safeguard' "$test_root/store-policy.log"
+done
 
 bash "$repo_dir/tests/global-instructions.sh"
 echo "Bootstrap orchestration test passed"
