@@ -95,6 +95,13 @@ changes in any section require reconciliation with the active policy; update
 that digest deliberately after review rather than copying historical wording
 into the new source. Bootstrap tests and the enhance workflow run these checks.
 The enhance workflow loads and proposes global edits to the new source only.
+The verified 2026-11-24 owner snapshot adds login authorization safeguards to the
+active global source; its compatibility digest is accepted only with those rules
+preserved. The named `company-login`, `aums-login` and `release-flow` skills are
+separately installed workflow dependencies, not bundled by this repository.
+On the current Mac they resolve through the existing local skill installation;
+this cleanup does not publish their private/untracked symlinks or install them
+on a fresh machine. Unknown later legacy changes still fail the drift check.
 Runtime, MCP, authentication and permissions are unchanged.
 
 Claude Code native AGENTS.md support scans project ancestors; it does not make
