@@ -30,8 +30,8 @@ jq -e '
 	.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS == "1"
 ' claude/settings.json >/dev/null
 
-rg -q 'Route substantial code reading to Claude Opus' agent/global/AGENTS.md
-rg -q 'Route architecture, coding judgment, synthesis, and final verdicts to Claude Opus' agent/global/AGENTS.md
+require_text 'Route substantial code reading, architecture and coding review to Claude Opus' agent/global/AGENTS.md
+require_text 'whose bounded verdict the coordinator integrates' agent/global/AGENTS.md
 if rg -ni 'fable' agent/global/AGENTS.md agent/skills/review/SKILL.md; then
 	echo "Shared routing prompts must use Opus instead of Fable" >&2
 	exit 1
@@ -39,14 +39,18 @@ fi
 rg -q 'ORCA_WORKTREE_ID' agent/global/AGENTS.md
 for routing_file in agent/global/AGENTS.md agent/skills/review/SKILL.md; do
 	require_text 'claude -p --model opus' "$routing_file"
-	require_text 'best-effort one-shot' "$routing_file"
-	require_text 'Codex runtime permits child processes' "$routing_file"
 	require_text 'read-only tools' "$routing_file"
 	require_text 'Non-Orca Claude one-shot' "$routing_file"
-	require_text 'not a Codex-native agent or a Claude-model MCP bridge' "$routing_file"
 	require_text 'claude mcp serve' "$routing_file"
 done
-require_text 'as the managed path:' agent/global/AGENTS.md
+# Canonical prose and the unchanged review skill express the same boundaries
+# with different wording; check each consumer without rewriting either source.
+require_text 'best-effort fallback only after confirming the CLI is installed/authenticated and child processes are permitted' agent/global/AGENTS.md
+require_text 'neither a Codex-native agent nor a Claude-model MCP bridge' agent/global/AGENTS.md
+require_text 'use supervised Orca Claude workers:' agent/global/AGENTS.md
+require_text 'best-effort one-shot' agent/skills/review/SKILL.md
+require_text 'Codex runtime permits child processes' agent/skills/review/SKILL.md
+require_text 'not a Codex-native agent or a Claude-model MCP bridge' agent/skills/review/SKILL.md
 require_text 'managed cross-runtime path:' agent/skills/review/SKILL.md
 rg -q 'serial-specific device lease' agent/global/AGENTS.md
 rg -q 'Workers must not invoke `/review`' agent/skills/review/SKILL.md

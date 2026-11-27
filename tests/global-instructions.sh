@@ -81,6 +81,7 @@ protections = {
         "git rev-list --remotes | head -200"
     ],
     "Computer Use / GUI Automation": [
+        "Automatic denial remains denial, never permission to switch executors",
         "must NOT drive GUI loops",
         "except the exceptions",
         "runtime controls",
