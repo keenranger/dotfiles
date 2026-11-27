@@ -100,6 +100,13 @@
       }
     ]
   },
+  "pluginConfigs": {
+    "cc-plugin-agents-md@builtin": {
+      "options": {
+        "instructionFiles": "claude-md-and-agents-md"
+      }
+    }
+  },
   "enabledPlugins": {
     "example-skills@anthropic-agent-skills": true,
     "device-control@asleep-internal-skills": true,

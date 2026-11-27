@@ -30,6 +30,12 @@ jq -e '
 	.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS == "1"
 ' claude/settings.json >/dev/null
 
+# Keep parent CLAUDE files from suppressing AGENTS-only repository guidance.
+if ! jq -e '.pluginConfigs["cc-plugin-agents-md@builtin"].options.instructionFiles == "claude-md-and-agents-md"' claude/settings.json >/dev/null; then
+	echo "Claude instructions must load both CLAUDE.md and AGENTS.md" >&2
+	exit 1
+fi
+
 require_text 'Route substantial code reading, architecture and coding review to Claude Opus' agent/global/AGENTS.md
 require_text 'whose bounded verdict the coordinator integrates' agent/global/AGENTS.md
 if rg -ni 'fable' agent/global/AGENTS.md agent/skills/review/SKILL.md; then
