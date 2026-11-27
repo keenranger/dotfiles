@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-test_root=$(mktemp -d)
+test_root=$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-bootstrap.XXXXXX")
 trap 'rm -rf "$test_root"' EXIT
 
 mkdir -p "$test_root/bin" "$test_root/home"
@@ -298,8 +298,8 @@ if bash "$compatibility_fixture/tests/global-instructions.sh" > "$test_root/logi
 	exit 1
 fi
 grep -q 'Missing login authorization safeguard' "$test_root/login-policy.log"
-for policy in '^- Prefer official provider APIs' '^- Preserve the project.s chosen build and upload pipeline' \
-	'^- Reuse an already uploaded build' '^- API authentication does not override'; do
+for policy in '^- For documented App Store Connect' '^- Preserve the project.s chosen build and upload pipeline' \
+	'^- Reuse uploaded builds' '^- API authentication does not override'; do
 	sed "/$policy/d" "$repo_dir/agent/global/AGENTS.md" > "$compatibility_fixture/agent/global/AGENTS.md"
 	if bash "$compatibility_fixture/tests/global-instructions.sh" > "$test_root/store-policy.log" 2>&1; then
 		echo "Missing store release protection was accepted: $policy" >&2
